@@ -1,0 +1,884 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>イヤートレーニング</title>
+<style>
+:root{color-scheme:light dark;--bg:#eef2f4;--fg:#14202a;--card:#fff;--bd:#cfd8de;--muted:#5b6b76;--ac:#0e7490;--acfg:#fff;--ok:#1f8a4c;--ng:#c0392b;--okbg:#ddf2e5;--ngbg:#f7e0dd;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1519;--fg:#e6edf1;--card:#182128;--bd:#2c3a43;--muted:#8fa1ac;--ac:#38bdd8;--acfg:#04222b;--ok:#4cc27f;--ng:#ef6b5f;--okbg:#173526;--ngbg:#3a1e1b}}
+:root[data-theme="dark"]{--bg:#0f1519;--fg:#e6edf1;--card:#182128;--bd:#2c3a43;--muted:#8fa1ac;--ac:#38bdd8;--acfg:#04222b;--ok:#4cc27f;--ng:#ef6b5f;--okbg:#173526;--ngbg:#3a1e1b}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 -apple-system,"Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif}
+main{max-width:520px;margin:0 auto;padding:16px}
+h1{font-size:20px;margin:4px 0 12px}
+button{font:inherit;color:inherit;background:var(--card);border:1px solid var(--bd);border-radius:12px;min-height:48px;padding:6px 12px;cursor:pointer;touch-action:manipulation}
+button:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+button.on{background:var(--ac);color:var(--acfg);border-color:var(--ac)}
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.seg button{flex:1 1 auto;white-space:nowrap}#levels.seg{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr))}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px;margin:12px 0}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row button{flex:1 1 auto;white-space:nowrap}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:8px;margin-top:12px}
+.slots{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.slot{min-height:68px;padding:4px;border:2px dashed var(--bd);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:600;text-align:center}
+.slot small{font-weight:400;color:var(--muted)}
+.ok{background:var(--okbg)!important;border-color:var(--ok)!important}
+.ng{background:var(--ngbg)!important;border-color:var(--ng)!important}
+#play{flex:2 1 auto;font-weight:600}
+#fb{margin-top:12px;min-height:24px;white-space:pre-line}
+#next{width:100%;margin-top:12px}
+.muted{color:var(--muted)}.small{font-size:13px}
+[hidden]{display:none!important}
+#levels.g{display:block}.lg{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px}.lgl{flex:0 0 76px;font-size:12px;color:var(--muted);padding-top:10px}.lgb{display:flex;flex-wrap:wrap;gap:6px;flex:1}.lgb button{flex:0 0 auto;min-width:46px;min-height:40px;padding:4px 8px;white-space:nowrap}
+textarea{width:100%;margin-top:8px;font:16px/1.4 ui-monospace,Menlo,monospace;color:var(--fg);background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:8px}
+table.st{width:100%;border-collapse:collapse;font-size:13px}table.st th,table.st td{padding:4px 6px;border-bottom:1px solid var(--bd);text-align:left;vertical-align:top}table.st.mx{font-size:12px;white-space:nowrap}table.st .mo{color:var(--ok);font-weight:600}table.st th{color:var(--muted);font-weight:600}.wk{color:var(--ng);font-weight:600}.h3{margin:14px 0 4px;font-weight:600;font-size:14px}
+details.card summary{min-height:44px;display:flex;align-items:center;font-weight:600;cursor:pointer}
+</style>
+<meta name="theme-color" content="#0e7490">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="イヤトレ">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+</head>
+<body>
+<main>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h1>イヤートレーニング</h1><span style="display:flex;gap:6px"><button id="rev" style="min-height:36px;font-size:13px;padding:4px 10px">復習 OFF</button><button id="nolog" style="min-height:36px;font-size:13px;padding:4px 10px">記録: ON</button></span></div>
+<section class="card" id="lsn"></section>
+<section class="card" id="tsc" hidden></section>
+<div id="mlv"><div class="seg" id="modes"></div>
+<div class="seg" id="levels"></div></div>
+<p class="muted small" id="desc" style="margin:0"></p>
+<p class="muted small" id="stat" style="margin:0 0 4px"></p>
+<div id="tbar" style="margin:0 0 6px"></div>
+<section class="card" id="song" hidden></section>
+<section class="card" id="qcard">
+<p id="prompt" style="margin:0 0 12px"></p>
+<div class="row"><button id="play" class="on">▶ 聴く</button><button id="slow">スロー OFF</button><button id="loop">ループ OFF</button><button id="ref" hidden>主音</button><button id="study" hidden>お手本 OFF</button><button id="diff" hidden>変化する音</button><button id="pa" hidden>1つ目だけ</button><button id="pb" hidden>2つ目だけ</button><button id="rfix" hidden>ルート: 固定</button></div>
+<div class="slots" id="slots" hidden></div>
+<div class="grid" id="opts"></div>
+<div id="fb"></div>
+<button id="next" hidden>次の問題</button>
+</section>
+<details class="card" id="cndp" hidden><summary>出題条件：<span id="cnds" style="margin-left:6px;font-weight:400"></span></summary><div id="cndb" style="margin-top:8px"></div><p class="muted small" id="cndn"></p></details>
+<p class="muted small">音が出ない場合は、端末のマナーモードを解除して音量を確認してください。記録はこのブラウザ内に保存されます。</p>
+<details class="card" id="stats"><summary>学習記録</summary><div id="sbody" class="small"></div></details>
+<details class="card" id="data"><summary>データ管理（バックアップ）</summary>
+<p class="muted small" id="dsum"></p>
+<div class="row"><button id="exp">書き出し</button><button id="imp">検証</button></div>
+<div class="row" style="margin-top:8px"><button id="cpy">コピー</button><button id="pst">貼り付け</button></div>
+<div class="row" style="margin-top:8px"><button id="rst">記録をリセット</button><button id="rsu">直前の状態に戻す</button></div>
+<textarea id="box" rows="5" placeholder="書き出したデータがここに出ます。読み込むときは、バックアップをここに貼り付けて「検証」を押します。"></textarea>
+<p class="small" id="dmsg"></p>
+<button id="apply" hidden style="width:100%">この内容で上書き</button>
+</details>
+</main>
+<script>
+const $=s=>document.querySelector(s),R=n=>Math.floor(Math.random()*n);
+const NAMES=['C','D♭','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
+const DEG=['1','♭2','2','♭3','3','4','♯4','5','♭6','6','♭7','7'];
+const CH={maj:{n:'メジャー',iv:[0,4,7]},min:{n:'マイナー',iv:[0,3,7]},maj7:{n:'maj7',iv:[0,4,7,11]},m7:{n:'m7',iv:[0,3,7,10]},dom7:{n:'7',iv:[0,4,7,10]},m7b5:{n:'m7♭5',iv:[0,3,6,10]},dim7:{n:'dim7',iv:[0,3,6,9]},sus4:{n:'sus4',iv:[0,5,7]},sus2:{n:'sus2',iv:[0,2,7]},add9:{n:'add9',iv:[0,4,7,14]},aug:{n:'aug',iv:[0,4,8]},dim:{n:'dim',iv:[0,3,6]}};
+const DT=[[0,'maj','I'],[2,'min','ii'],[4,'min','iii'],[5,'maj','IV'],[7,'maj','V'],[9,'min','vi'],[11,'dim','vii°'],[5,'min','iv']];
+const D7=[[0,'maj7','Imaj7'],[2,'m7','ii7'],[4,'m7','iii7'],[5,'maj7','IVmaj7'],[7,'dom7','V7'],[9,'m7','vi7'],[11,'m7b5','viiø']];
+const CUR=[[0,3,4,0],[0,4,5,3],[0,5,3,4],[5,3,0,4],[0,3,5,4],[3,4,2,5],[0,2,3,4],[0,5,1,4]];
+const LV={q:[['maj','min'],['maj','min','maj7','m7','dom7'],['maj','min','maj7','m7','dom7','m7b5','dim7','sus4','sus2','add9','aug']],b:[[0,7],[0,5,7],[0,2,4,5,7,9,11],[0,1,2,3,4,5,6,7,8,9,10,11]]};
+{const A=LV.q[2];LV.q=[['maj','min'],['maj','dom7'],['maj','maj7','dom7'],['min','m7'],LV.q[1],A,A]}const FEEL={maj:'明るい・安定',min:'暗い・切ない',maj7:'ふわっと浮遊',m7:'やわらかい暗さ',dom7:'緊張感・解決したい',m7b5:'不安定・翳り',dim7:'ぞっとする緊迫',sus4:'宙に浮く',sus2:'透明感',add9:'きらめき',aug:'不思議・宙づり'};const CUR1=[[0,3,4,0],[0,4,5,3],[0,5,3,4],[5,3,0,4],[0,3,5,4]];const Q7='どちらに7thが含まれていますか？',CL=[
+{n:'3rd 比較',th:'3rd',ph:'cmp',pr:[['maj','min','min','どちらが「マイナー」ですか？']]},
+{n:'3rd 単独',th:'3rd',ph:'solo',opts:['maj','min']},
+{n:'7thの有無 比較',th:'7th',ph:'cmp',pr:[['maj','dom7','dom7',Q7],['maj','maj7','maj7',Q7],['min','m7','m7',Q7]]},
+{n:'7thの有無 単独（5種）',th:'7th',ph:'solo',opts:['maj','dom7','maj7','min','m7']},
+{n:'7thの種類 比較',th:'7thk',ph:'cmp',pr:[['maj7','dom7','dom7','どちらが「7」（♭7th）ですか？'],['dom7','m7','m7','どちらが「m7」（短3度）ですか？'],['maj7','m7','m7','どちらが「m7」ですか？']]},
+{n:'7thの種類 単独',th:'7thk',ph:'solo',opts:['maj7','dom7','m7']},
+{n:'5thの変化 比較',th:'5th',ph:'cmp',pr:[['maj','aug','aug','どちらに増5度が含まれていますか？'],['min','dim','dim','どちらに減5度が含まれていますか？'],['m7','m7b5','m7b5','どちらに減5度が含まれていますか？'],['m7b5','dim7','dim7','どちらが「dim7」（減7度）ですか？']]},
+{n:'5thの変化 単独（三和音）',th:'5th',ph:'solo',opts:['maj','aug','min','dim']},
+{n:'5thの変化 単独（7th系）',th:'5th',ph:'solo',opts:['m7','m7b5','dim7']},
+{n:'総合 3種',th:'mix',ph:'solo',opts:['maj','min','dom7']},
+{n:'総合 5種',th:'mix',ph:'solo',opts:['maj','min','dom7','maj7','m7']},
+{n:'総合 7種',th:'mix',ph:'solo',opts:['maj','min','dom7','maj7','m7','m7b5','dim']},
+{n:'総合 9種',th:'mix',ph:'solo',opts:['maj','min','dom7','maj7','m7','m7b5','dim','aug','dim7']}];
+CL.splice(0,CL.length,
+{id:'3rd.cmp',n:'3rd 比較（C/Cm）',th:'3rd',ph:'cmp',pr:[['maj','min','min','どちらが「マイナー」ですか？','e3']]},
+{id:'3rd.solo',n:'3rd 単独',th:'3rd',ph:'solo',opts:['maj','min']},
+{id:'7n.cmp',n:'7thの有無 比較',th:'7th',ph:'cmp',pr:[['maj','dom7','dom7',Q7,'e7n'],['maj','maj7','maj7',Q7,'e7n'],['min','m7','m7',Q7,'e7n']]},
+{id:'7n.solo',n:'7thの有無 単独（5種）',th:'7th',ph:'solo',opts:['maj','dom7','maj7','min','m7']},
+{id:'7k.a',n:'7thの種類 比較（Cmaj7/C7）',th:'7thk',ph:'cmp',pr:[['maj7','dom7','dom7','どちらが「7」（♭7th）ですか？','e7k']]},
+{id:'7k.b',n:'7thコードの3rd 比較（C7/Cm7）',th:'7thk',ph:'cmp',pr:[['dom7','m7','m7','どちらが「m7」（短3度）ですか？','e3']]},
+{id:'7k.c',n:'3rdと7thの複合 比較（Cmaj7/Cm7）',th:'7thk',ph:'cmp',pr:[['maj7','m7','m7','どちらが「m7」ですか？','ecx']]},
+{id:'7k.solo',n:'7thコード 単独（maj7/7/m7）',th:'7thk',ph:'solo',opts:['maj7','dom7','m7']},
+{id:'5a.cmp',n:'増5度 比較（C/Caug）',th:'5th',ph:'cmp',pr:[['maj','aug','aug','どちらに増5度が含まれていますか？','e5a']]},
+{id:'5d3.cmp',n:'減5度（三和音）比較（Cm/Cdim）',th:'5th',ph:'cmp',pr:[['min','dim','dim','どちらに減5度が含まれていますか？','e5d']]},
+{id:'5d4.cmp',n:'減5度（四和音）比較（Cm7/Cm7♭5）',th:'5th',ph:'cmp',pr:[['m7','m7b5','m7b5','どちらに減5度が含まれていますか？','e5d']]},
+{id:'5d7.cmp',n:'減7度 比較（Cm7♭5/Cdim7）',th:'5th',ph:'cmp',pr:[['m7b5','dim7','dim7','どちらが「dim7」（減7度）ですか？','e7d']]},
+{id:'5.solo3',n:'5th系 単独（三和音）',th:'5th',ph:'solo',opts:['maj','min','aug','dim']},
+{id:'5.solo7',n:'5th系 単独（四和音）',th:'5th',ph:'solo',opts:['m7','m7b5','dim7']},
+{id:'mix3',n:'総合 3種',th:'mix',ph:'solo',opts:['maj','min','dom7']},
+{id:'mix5',n:'総合 5種',th:'mix',ph:'solo',opts:['maj','min','dom7','maj7','m7']},
+{id:'mix7',n:'総合 7種',th:'mix',ph:'solo',opts:['maj','min','dom7','maj7','m7','m7b5','dim']},
+{id:'mix9',n:'総合 9種',th:'mix',ph:'solo',opts:['maj','min','dom7','maj7','m7','m7b5','dim','aug','dim7']});
+const ELT={maj:['e3'],min:['e3'],dom7:['e7n','e7k'],maj7:['e7n','e7k'],m7:['e7n','e3'],aug:['e5a'],dim:['e5d'],m7b5:['e5d'],dim7:['e7d','e5d']},CIDS={0:'3rd.cmp',1:'3rd.solo',2:'7n.cmp',3:'7n.solo',5:'7k.solo',7:'5.solo3',8:'5.solo7',9:'mix3',10:'mix5',11:'mix7',12:'mix9'},PRID={'maj|min':'3rd.cmp','maj|dom7':'7n.cmp','maj|maj7':'7n.cmp','min|m7':'7n.cmp','maj7|dom7':'7k.a','dom7|m7':'7k.b','maj7|m7':'7k.c','maj|aug':'5a.cmp','min|dim':'5d3.cmp','m7|m7b5':'5d4.cmp','m7b5|dim7':'5d7.cmp'};
+LV.c=CL.map(x=>x.ph=='cmp'?[0,1]:x.opts);const OP=[[0,3,4],[0,3,4],[0,3,4,5],[0,1,2,3,4,5],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6]],PL7=l=>l==5||l==7||l==9||l==11;
+const IVN=['同音','短2度','長2度','短3度','長3度','完全4度','増4/減5度','完全5度','短6度','長6度','短7度','長7度','オクターブ'],ivLab=x=>x=='S'?'同音':x=='U'?'上行':x=='D'?'下行':IVN[x];
+const DIA=[0,2,4,5,7,9,11],LLV=[{n:2,pool:[0,7]},{n:3,pool:[0,5,7]},{n:3,pool:DIA},{n:4,pool:DIA},{n:4,pool:[0,1,2,3,4,5,6,7,8,9,10,11]}];
+const ALL12=[1,2,3,4,5,6,7,8,9,10,11,12];LV.i=[['S','U','D'],[7,12],[5,12],[5,7],[5,7,12],[4,7,12],[3,4],[3,4,5,7],[1,2,3,4],[1,2,3,4,5,7],[8,9,10,11],ALL12,[5,7],[3,4,5,7,12],ALL12,ALL12];LV.l=LLV.map(x=>x.pool);
+const FN={T:[0,5,2],S:[3,1],D:[4,6]},FNL={T:'トニック（T）',S:'サブドミナント（S）',D:'ドミナント（D）'},CAD2={'V-I':{seq:[4,0],n:'正格終止'},'IV-I':{seq:[3,0],n:'変格終止'},'V-vi':{seq:[4,5],n:'偽終止'},'ii-V':{seq:[1,4],n:'半終止へ向かう'}},CAD3={'ii-V-I':[1,4,0],'IV-V-I':[3,4,0],'vi-V-I':[5,4,0],'I-V-I':[0,4,0]};
+LV.f=[[0,4],[0,3,4],[0,3,4,5],[0,1,3,4,5],[0,1,2,3,4,5,6],['T','S','D'],['V-I','IV-I','V-vi','ii-V'],['ii-V-I','IV-V-I','vi-V-I','I-V-I']];
+const RI={I:0,ii:1,iii:2,IV:3,V:4,vi:5,'vii°':6,iv:7};
+LV.g=[['I-IV','I-V','IV-I','V-I'],['I-vi','vi-IV','ii-V','V-vi','IV-V','iii-vi'],['I-IV-V','I-V-vi','ii-V-I','IV-V-I','I-IV-I'],['I-vi-IV','I-vi-ii','vi-IV-V','iii-vi-ii','I-IV-iv','IV-iv-I'],['I-IV-V-I','I-V-vi-IV','I-vi-ii-V','iii-vi-ii-V','I-IV-iv-I','vi-IV-I-V'],['I-IV-V-I','I-V-vi-IV','I-vi-ii-V','iii-vi-ii-V','I-IV-iv-I','vi-IV-I-V','I-vi-IV-V','ii-V-I-IV']];
+const gSeq=x=>x.split('-').map(r=>RI[r]);
+const HQ={maj7:[0,4,7,11],dom7:[0,4,7,10],m7:[0,3,7,10],m7b5:[0,3,6,10]},QS={maj7:'maj7',dom7:'7',m7:'m7',m7b5:'m7♭5'},
+PAT={'ii-V-I':[[2,'m7'],[7,'dom7'],[0,'maj7']],'iiø-V-i':[[2,'m7b5'],[7,'dom7'],[0,'m7']],'IV-V-I':[[5,'maj7'],[7,'dom7'],[0,'maj7']],'iii-vi-ii':[[4,'m7'],[9,'m7'],[2,'m7']],
+'I-vi-ii-V':[[0,'maj7'],[9,'m7'],[2,'m7'],[7,'dom7']],'iii-vi-ii-V':[[4,'m7'],[9,'m7'],[2,'m7'],[7,'dom7']],'ii-V-I-vi':[[2,'m7'],[7,'dom7'],[0,'maj7'],[9,'m7']],'vi-ii-V-I':[[9,'m7'],[2,'m7'],[7,'dom7'],[0,'maj7']],'I-IV-ii-V':[[0,'maj7'],[5,'maj7'],[2,'m7'],[7,'dom7']]},
+PLH={'ii-V-I':'ii7–V7–Imaj7','iiø-V-i':'iiø–V7–im7','IV-V-I':'IVmaj7–V7–Imaj7','iii-vi-ii':'iii7–vi7–ii7','I-vi-ii-V':'Imaj7–vi7–ii7–V7','iii-vi-ii-V':'iii7–vi7–ii7–V7','ii-V-I-vi':'ii7–V7–Imaj7–vi7','vi-ii-V-I':'vi7–ii7–V7–Imaj7','I-IV-ii-V':'Imaj7–IVmaj7–ii7–V7'};
+const P4=['I-vi-ii-V','iii-vi-ii-V','ii-V-I-vi','vi-ii-V-I','I-IV-ii-V'];
+LV.h=[[4,3],[11,10],['maj7','dom7','m7','m7b5'],['maj7','dom7','m7','m7b5'],['ii-V-I','iiø-V-i'],['ii-V-I','iiø-V-i','IV-V-I','iii-vi-ii'],P4,P4];
+const XQ={maj:[0,4,7],min:[0,3,7],d7:[0,4,7,10],m7:[0,3,7,10],m7b5:[0,3,6,10],maj7:[0,4,7,11],dim7:[0,3,6,9]},XS={maj:'',min:'m',d7:'7',m7:'m7',m7b5:'m7♭5',maj7:'maj7',dim7:'dim7'};
+const PJ={'VI7-ii':{l:'VI7→ii（V7/ii）',s:[[9,'d7'],[2,'min']]},'II7-V':{l:'II7→V（V7/V）',s:[[2,'d7'],[7,'maj']]},'III7-vi':{l:'III7→vi（V7/vi）',s:[[4,'d7'],[9,'min']]},'I7-IV':{l:'I7→IV（V7/IV）',s:[[0,'d7'],[5,'maj']]},
+'I-VI7-ii':{l:'I–VI7–ii',s:[[0,'maj'],[9,'d7'],[2,'min']]},'I-II7-V':{l:'I–II7–V',s:[[0,'maj'],[2,'d7'],[7,'maj']]},'I-III7-vi':{l:'I–III7–vi',s:[[0,'maj'],[4,'d7'],[9,'min']]},'I-I7-IV':{l:'I–I7–IV',s:[[0,'maj'],[0,'d7'],[5,'maj']]},'I-VII7-iii':{l:'I–VII7–iii',s:[[0,'maj'],[11,'d7'],[4,'min']]},
+'I-VI7-ii-V7':{l:'I–VI7–ii–V7',s:[[0,'maj'],[9,'d7'],[2,'min'],[7,'d7']]},'I-III7-vi-IV':{l:'I–III7–vi–IV',s:[[0,'maj'],[4,'d7'],[9,'min'],[5,'maj']]},'I-II7-V-I':{l:'I–II7–V–I',s:[[0,'maj'],[2,'d7'],[7,'maj'],[0,'maj']]},'I-I7-IV-V7':{l:'I–I7–IV–V7',s:[[0,'maj'],[0,'d7'],[5,'maj'],[7,'d7']]},'I-VII7-iii-vi':{l:'I–VII7–iii–vi',s:[[0,'maj'],[11,'d7'],[4,'min'],[9,'min']]},
+'ii-V-I':{l:'ii7–V7–Imaj7（長調）',s:[[2,'m7'],[7,'d7'],[0,'maj7']]},'iiø-V-i':{l:'iiø–V7–im7（短調）',s:[[2,'m7b5'],[7,'d7'],[0,'m7']],mn:1},
+'i-iv-V-i':{l:'im–ivm–V7–im',s:[[0,'min'],[5,'min'],[7,'d7'],[0,'min']],mn:1},'i-bVII-bVI-V':{l:'im–♭VII–♭VI–V7（アンダルシア）',s:[[0,'min'],[10,'maj'],[8,'maj'],[7,'d7']],mn:1},'i-bVI-bIII-bVII':{l:'im–♭VI–♭III–♭VII',s:[[0,'min'],[8,'maj'],[3,'maj'],[10,'maj']],mn:1}};
+Object.assign(PJ,{'IV-I':{l:'IV→I（変格終止）',s:[[5,'maj'],[0,'maj']]},'iv-I':{l:'ivm→I（借用：マイナー変格）',s:[[5,'min'],[0,'maj']]},'bVII-I':{l:'♭VII→I（借用：ミクソリディアン）',s:[[10,'maj'],[0,'maj']]},'bVI-V7':{l:'♭VI→V7（借用）',s:[[8,'maj'],[7,'d7']]},'bIII-IV':{l:'♭III→IV（借用）',s:[[3,'maj'],[5,'maj']]},
+'I-iv-I':{l:'I–ivm–I',s:[[0,'maj'],[5,'min'],[0,'maj']]},'I-bVII-IV':{l:'I–♭VII–IV',s:[[0,'maj'],[10,'maj'],[5,'maj']]},'I-bVI-bVII':{l:'I–♭VI–♭VII',s:[[0,'maj'],[8,'maj'],[10,'maj']]},'I-IV-iv':{l:'I–IV–ivm',s:[[0,'maj'],[5,'maj'],[5,'min']]},'I-bIII-IV':{l:'I–♭III–IV',s:[[0,'maj'],[3,'maj'],[5,'maj']]},
+'I-IV-iv-I':{l:'I–IV–ivm–I',s:[[0,'maj'],[5,'maj'],[5,'min'],[0,'maj']]},'I-bVII-IV-I':{l:'I–♭VII–IV–I',s:[[0,'maj'],[10,'maj'],[5,'maj'],[0,'maj']]},'I-bVI-bVII-I':{l:'I–♭VI–♭VII–I',s:[[0,'maj'],[8,'maj'],[10,'maj'],[0,'maj']]},'I-bIII-bVII-IV':{l:'I–♭III–♭VII–IV',s:[[0,'maj'],[3,'maj'],[10,'maj'],[5,'maj']]},'I-iv-bVII-I':{l:'I–ivm–♭VII–I',s:[[0,'maj'],[5,'min'],[10,'maj'],[0,'maj']]}});
+Object.assign(PJ,{'V7-I':{l:'V7→Imaj7（通常のドミナント）',s:[[7,'d7'],[0,'maj7']]},'bII7-I':{l:'♭II7→Imaj7（裏コード）',s:[[1,'d7'],[0,'maj7']]},
+'I-V7-I':{l:'Imaj7–V7–Imaj7',s:[[0,'maj7'],[7,'d7'],[0,'maj7']]},'I-bII7-I':{l:'Imaj7–♭II7–Imaj7（裏コード）',s:[[0,'maj7'],[1,'d7'],[0,'maj7']]},'ii-bII7-I':{l:'ii7–♭II7–Imaj7（裏コード）',s:[[2,'m7'],[1,'d7'],[0,'maj7']]},
+'t-I-vi-ii-V':{l:'Imaj7–vi7–ii7–V7',s:[[0,'maj7'],[9,'m7'],[2,'m7'],[7,'d7']]},'t-I-vi-ii-bII':{l:'Imaj7–vi7–ii7–♭II7（裏）',s:[[0,'maj7'],[9,'m7'],[2,'m7'],[1,'d7']]},'t-ii-V-I-vi':{l:'ii7–V7–Imaj7–vi7',s:[[2,'m7'],[7,'d7'],[0,'maj7'],[9,'m7']]},'t-ii-bII-I-vi':{l:'ii7–♭II7–Imaj7–vi7（裏）',s:[[2,'m7'],[1,'d7'],[0,'maj7'],[9,'m7']]},
+'I-sIdim-ii':{l:'I–♯I°7–ii（経過ディミニッシュ）',s:[[0,'maj'],[1,'dim7'],[2,'min']]},'IV-sIVdim-V':{l:'IV–♯IV°7–V（経過ディミニッシュ）',s:[[5,'maj'],[6,'dim7'],[7,'maj']]},'ii-siidim-iii':{l:'ii–♯ii°7–iii（経過ディミニッシュ）',s:[[2,'min'],[3,'dim7'],[4,'min']]},'I-bIIIdim-ii':{l:'I–♭III°7–ii（経過ディミニッシュ）',s:[[0,'maj'],[3,'dim7'],[2,'min']]},'I-ii-iii':{l:'I–ii–iii（ディミニッシュなし）',s:[[0,'maj'],[2,'min'],[4,'min']]},
+'I-sIdim-ii-V7':{l:'I–♯I°7–ii–V7',s:[[0,'maj'],[1,'dim7'],[2,'min'],[7,'d7']]},'I-IV-sIVdim-V':{l:'I–IV–♯IV°7–V',s:[[0,'maj'],[5,'maj'],[6,'dim7'],[7,'maj']]},'I-ii-siidim-iii':{l:'I–ii–♯ii°7–iii',s:[[0,'maj'],[2,'min'],[3,'dim7'],[4,'min']]},'I-bIIIdim-ii-V7':{l:'I–♭III°7–ii–V7',s:[[0,'maj'],[3,'dim7'],[2,'min'],[7,'d7']]},'I-ii-iii-IV':{l:'I–ii–iii–IV（ディミニッシュなし）',s:[[0,'maj'],[2,'min'],[4,'min'],[5,'maj']]}});
+const MI4=['I-IV-iv-I','I-bVII-IV-I','I-bVI-bVII-I','I-bIII-bVII-IV','I-iv-bVII-I'];
+const J4=['I-VI7-ii-V7','I-III7-vi-IV','I-II7-V-I','I-I7-IV-V7','I-VII7-iii-vi'];
+LV.j=[['VI7-ii','II7-V','III7-vi','I7-IV'],['I-VI7-ii','I-II7-V','I-III7-vi','I-I7-IV','I-VII7-iii'],J4,['ii-V-I','iiø-V-i'],['iiø-V-i','i-iv-V-i','i-bVII-bVI-V','i-bVI-bIII-bVII'],[...J4,'i-iv-V-i','i-bVII-bVI-V','i-bVI-bIII-bVII'],['IV-I','iv-I','bVII-I','bVI-V7','bIII-IV'],['I-iv-I','I-bVII-IV','I-bVI-bVII','I-IV-iv','I-bIII-IV'],MI4,[...MI4,'I-VI7-ii-V7','I-III7-vi-IV','I-II7-V-I'],['V7-I','bII7-I'],['ii-V-I','ii-bII7-I','I-V7-I','I-bII7-I'],['t-I-vi-ii-V','t-I-vi-ii-bII','t-ii-V-I-vi','t-ii-bII-I-vi'],['I-sIdim-ii','IV-sIVdim-V','ii-siidim-iii','I-bIIIdim-ii','I-ii-iii'],['I-sIdim-ii-V7','I-IV-sIVdim-V','I-ii-siidim-iii','I-bIIIdim-ii-V7','I-ii-iii-IV'],['t-I-vi-ii-bII','t-ii-bII-I-vi','I-sIdim-ii-V7','I-IV-sIVdim-V','I-ii-siidim-iii','I-bIIIdim-ii-V7']];
+const KR={r:'ルート',t3:'3rd',f5:'5th',s7:'7th'},KOFF=(q,r)=>({r:0,t3:XQ[q][1],f5:XQ[q][2],s7:XQ[q][3]})[r];
+const PK={'I-I6':[[0,'maj',0],[0,'maj',4]],'I-I64':[[0,'maj',0],[0,'maj',7]],'I-V6':[[0,'maj',0],[7,'maj',11]],'IV-IV6':[[5,'maj',5],[5,'maj',9]],
+'I-V6-vi':[[0,'maj',0],[7,'maj',11],[9,'min',9]],'I-I6-IV':[[0,'maj',0],[0,'maj',4],[5,'maj',5]],'I-I64-vi':[[0,'maj',0],[0,'maj',7],[9,'min',9]],'IV-I64-V':[[5,'maj',5],[0,'maj',7],[7,'maj',7]],'I-V-vi':[[0,'maj',0],[7,'maj',7],[9,'min',9]],
+'I-V-vi-IV':[[0,'maj',0],[7,'maj',7],[9,'min',9],[5,'maj',5]],'I-V6-vi-IV':[[0,'maj',0],[7,'maj',11],[9,'min',9],[5,'maj',5]],'I-I6-IV-V':[[0,'maj',0],[0,'maj',4],[5,'maj',5],[7,'maj',7]],'IV-I6-ii-V':[[5,'maj',5],[0,'maj',4],[2,'min',2],[7,'maj',7]],'I-I64-vi-IV':[[0,'maj',0],[0,'maj',7],[9,'min',9],[5,'maj',5]]};
+const PKL={'I-I6':'I→I6（第1転回）','I-I64':'I→I64（第2転回）','I-V6':'I→V6（Vの第1転回）','IV-IV6':'IV→IV6（第1転回）','I-V6-vi':'I–V6–vi','I-I6-IV':'I–I6–IV','I-I64-vi':'I–I64–vi','IV-I64-V':'IV–I64–V','I-V-vi':'I–V–vi（転回なし）','I-V-vi-IV':'I–V–vi–IV（転回なし）','I-V6-vi-IV':'I–V6–vi–IV','I-I6-IV-V':'I–I6–IV–V','IV-I6-ii-V':'IV–I6–ii–V','I-I64-vi-IV':'I–I64–vi–IV'};
+LV.k=[['r','t3'],['r','t3','f5'],['r','t3','f5','s7'],['r','t3','f5'],['r','t3','f5','s7'],['I-I6','I-I64','I-V6','IV-IV6'],['I-V6-vi','I-I6-IV','I-I64-vi','IV-I64-V','I-V-vi'],['I-V-vi-IV','I-V6-vi-IV','I-I6-IV-V','IV-I6-ii-V','I-I64-vi-IV'],['I-V6-vi','I-I6-IV','IV-I64-V','I-V6-vi-IV','I-I6-IV-V','IV-I6-ii-V']];
+const kName=(pc,q,bp)=>NAMES[pc%12]+XS[q]+((bp%12)!=(pc%12)?'/'+NAMES[bp%12]:'');
+function voiceK(chs,sh,prev){const out=[];let pv=prev||null;chs.forEach(pcs=>{const cands=[];for(let r=0;r<pcs.length;r++){const rot=pcs.slice(r).concat(pcs.slice(0,r));for(const o of [-12,0,12]){let n=rot[0]+12*Math.ceil((57+sh+o-rot[0])/12);const ns=[n];for(let i=1;i<rot.length;i++){let m=rot[i]+12*Math.floor(ns[i-1]/12);while(m<=ns[i-1])m+=12;ns.push(m)}if(ns[0]>=52+(sh>0?sh:0)&&ns[ns.length-1]<=80+sh)cands.push(ns)}}
+let best=cands[0],bs=1e9;cands.forEach(ns=>{const sc=pv?ns.reduce((a,x,i)=>a+Math.abs(x-pv[Math.min(i,pv.length-1)]),0)+Math.abs(ns[ns.length-1]-pv[pv.length-1])*.5:Math.abs(ns[0]-(62+sh));if(sc<bs){bs=sc;best=ns}});out.push(best);pv=best});return out}
+const bassK=(pc,sh)=>{let n=40+((pc-40)%12+12)%12;return n+(sh>0?sh:0)};
+const QM={dom:[0,4,7,10],maj:[0,4,7,11],min:[0,3,7,10]},QMS={dom:'7',maj:'maj7',min:'m7'},TOFF={'9':2,'b9':1,'#9':3,'11':5,'#11':6,'13':9,'b13':8};
+const TNL={none:'テンションなし','9':'9th','b9':'♭9','#9':'♯9','11':'11th','#11':'♯11','13':'13th','b13':'♭13'};
+LV.m=[['none','9','13'],['none','9','#11','13'],['none','9','11','13'],['b9','#9','#11','b13'],['none','9','13','b9','#9','#11','b13'],['none','b9','#9','#11','b13','13']];
+const QL=['dom','maj','min','dom','dom','dom'];
+function voiceM(r,q,tn,sh){const iv=QM[q],up=(from,pc)=>{let d=(((pc-from)%12)+12)%12;return from+(d||12)};
+const p3=(r+iv[1])%12,n3=p3+12*Math.ceil((Math.max(55+sh,52)-p3)/12),n7=up(n3,(r+iv[3])%12),nx=up(n7,tn=='none'?(r+7)%12:(r+TOFF[tn])%12);return [bassK(r%12,sh),n3,n7,nx]}
+const NT={
+'T1':{l:'IV–V–iii–vi（王道進行）',s:[[5,'maj'],[7,'maj'],[4,'min'],[9,'min']]},'T2':{l:'I–V–vi–IV',s:[[0,'maj'],[7,'maj'],[9,'min'],[5,'maj']]},'T3':{l:'vi–IV–I–V',s:[[9,'min'],[5,'maj'],[0,'maj'],[7,'maj']]},'T4':{l:'I–vi–IV–V（50年代進行）',s:[[0,'maj'],[9,'min'],[5,'maj'],[7,'maj']]},'T5':{l:'I–V–vi–iii（カノン前半）',s:[[0,'maj'],[7,'maj'],[9,'min'],[4,'min']]},
+'M1':{mn:1,l:'i–VI–III–VII',s:[[0,'min'],[8,'maj'],[3,'maj'],[10,'maj']]},'M2':{mn:1,l:'i–iv–VII–III',s:[[0,'min'],[5,'min'],[10,'maj'],[3,'maj']]},'M3':{mn:1,l:'i–VII–VI–VII',s:[[0,'min'],[10,'maj'],[8,'maj'],[10,'maj']]},'M4':{mn:1,l:'i–iv–V–i',s:[[0,'min'],[5,'min'],[7,'maj'],[0,'min']]},
+'J1':{l:'iim7–V7–Imaj7–vi7',s:[[2,'m7'],[7,'d7'],[0,'maj7'],[9,'m7']]},'J2':{l:'Imaj7–IVmaj7–iii7–vi7',s:[[0,'maj7'],[5,'maj7'],[4,'m7'],[9,'m7']]},'J3':{l:'IVmaj7–V7–iii7–vi7',s:[[5,'maj7'],[7,'d7'],[4,'m7'],[9,'m7']]},'J4':{l:'vi7–iim7–V7–Imaj7',s:[[9,'m7'],[2,'m7'],[7,'d7'],[0,'maj7']]},
+'N1':{mn:1,l:'im7–ivm7–♭VII7–♭IIImaj7',s:[[0,'m7'],[5,'m7'],[10,'d7'],[3,'maj7']]},'N2':{mn:1,l:'iim7♭5–V7–im7–im7',s:[[2,'m7b5'],[7,'d7'],[0,'m7'],[0,'m7']]},
+'I1':{l:'I–V/7–vi–IV（ベース下行）',s:[[0,'maj',0],[7,'maj',11],[9,'min',9],[5,'maj',5]]},'I2':{l:'I–I/3–IV–V',s:[[0,'maj',0],[0,'maj',4],[5,'maj',5],[7,'maj',7]]},'I3':{l:'IV–I/5–V–vi',s:[[5,'maj',5],[0,'maj',7],[7,'maj',7],[9,'min',9]]},'I4':{l:'vi–V/7–IV–I/5',s:[[9,'min',9],[7,'maj',11],[5,'maj',5],[0,'maj',7]]},'I5':{l:'Imaj7–V/7–vi7–IVmaj7',s:[[0,'maj7',0],[7,'maj',11],[9,'m7',9],[5,'maj7',5]]},
+'S1':{l:'J-POP王道（IVmaj7–V7–iii7–vi7）',s:[[5,'maj7'],[7,'d7'],[4,'m7'],[9,'m7']]},'S2':{l:'小室進行（vi–IV–V–I）',s:[[9,'min'],[5,'maj'],[7,'maj'],[0,'maj']]},'S3':{l:'カノン風（I–V/7–vi–iii/5）',s:[[0,'maj',0],[7,'maj',11],[9,'min',9],[4,'min',7]]},'S4':{l:'歌謡曲（i–iv–V7–i）',mn:1,s:[[0,'min'],[5,'min'],[7,'d7'],[0,'min']]},'S5':{l:'ジャズ（iim7–V7–Imaj7–VI7）',s:[[2,'m7'],[7,'d7'],[0,'maj7'],[9,'d7']]},'S6':{l:'IVmaj7–III7–vi7–II7（二次ドミナント）',s:[[5,'maj7'],[4,'d7'],[9,'m7'],[2,'d7']]}};
+NT.E1={l:'カノン進行（I–V/7–vi–iii/5–IV–I/3–IV–V）',s:[[0,'maj',0],[7,'maj',11],[9,'min',9],[4,'min',7],[5,'maj',5],[0,'maj',4],[5,'maj',5],[7,'maj',7]]};
+NT.E2={l:'J-POP王道（IVmaj7–V7–iii7–vi7 ×2、終止つき）',s:[[5,'maj7'],[7,'d7'],[4,'m7'],[9,'m7'],[5,'maj7'],[7,'d7'],[0,'maj7'],[0,'maj7']]};
+NT.E3={l:'小室進行（vi–IV–V–I ×2）',s:[[9,'min'],[5,'maj'],[7,'maj'],[0,'maj'],[9,'min'],[5,'maj'],[7,'maj'],[7,'maj']]};
+NT.E4={mn:1,l:'歌謡曲（i–iv–V7–i–VI–iv–V7–i）',s:[[0,'min'],[5,'min'],[7,'d7'],[0,'min'],[8,'maj'],[5,'min'],[7,'d7'],[0,'min']]};
+NT.E5={l:'ジャズ（iim7–V7–Imaj7–VI7 ×2）',s:[[2,'m7'],[7,'d7'],[0,'maj7'],[9,'d7'],[2,'m7'],[7,'d7'],[0,'maj7'],[0,'maj7']]};
+NT.E6={l:'IV–I/5–V–vi–IV–V/7–I',s:[[5,'maj',5],[0,'maj',7],[7,'maj',7],[9,'min',9],[5,'maj',5],[7,'maj',11],[0,'maj',0],[0,'maj',0]]};
+LV.n=[['T1','T2','T3','T4','T5'],['T1','T2','T3','T4','T5','M1','M2','M3','M4'],['J1','J2','J3','J4','N1','N2'],['I1','I2','I3','I4','I5'],['S1','S2','S3','S4','S5','S6'],['E1','E2','E3','E4','E5','E6'],['S1','S2','S3','S4','S5','S6','I1','I3'],['E1','E2','E3','E4','E5','E6'],[]];
+const NS=[['bass','qual'],['mode','bass','qual'],['mode','bass','qual'],['mode','bass','root','qual'],['mode','bass','root','qual'],['mode','bass','root','qual'],['mode','bass','root','qual'],['mode','bass','root','qual']],
+NDEG=[[0,2,4,5,7,9,11],[0,2,3,4,5,7,8,9,10,11],[0,2,3,4,5,7,8,9,10,11],[0,2,4,5,7,9,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11]],
+NQ=[['maj','min'],['maj','min'],['maj7','m7','d7','m7b5'],['maj','min','maj7','m7'],['maj','min','maj7','m7','d7','m7b5'],['maj','min','maj7','m7','d7','m7b5'],['maj','min','maj7','m7','d7','m7b5'],['maj','min','maj7','m7','d7','m7b5']],
+NQN={maj:'メジャー',min:'マイナー',maj7:'maj7',m7:'m7',d7:'7',m7b5:'m7♭5'},NSN={mode:'長調か短調か',bass:'ベースの音',root:'コードのルート',qual:'コードの種類'};
+const nLen=c=>NS[S.lv.n][c.si]=='mode'?1:c.seq.length,nStep=c=>NS[S.lv.n][c.si];
+const nCh=c=>c.seq.map(x=>({n:NAMES[(c.key+x.o)%12]+XS[x.q]+(x.bo!=x.o?'/'+NAMES[(c.key+x.bo)%12]:'')}));
+const nSig=q=>q.map(x=>x.o+x.q+x.bo).join(',');
+function nVar(t,wantVar){const base=t.s.map(x=>({o:x[0],q:x[1],bo:x.length>2?x[2]:x[0]})),mn=!!t.mn,n=base.length,tags=[];let seq=base.map(x=>Object.assign({},x));
+const isM=q=>q=='maj'||q=='maj7',isN=q=>q=='min'||q=='m7',used=new Set();
+const K=[];
+for(let i=0;i<n;i++){const x=base[i],last=i==n-1;
+ if(!mn){if(x.o==5&&isM(x.q)&&x.bo==5)K.push({i,t:'sub',f:()=>({o:2,q:x.q=='maj'?'min':'m7',bo:2}),tag:'IV→ii（代理）'});
+  if(x.o==0&&isM(x.q)&&x.bo==0&&!last&&i>0)K.push({i,t:'sub',f:()=>({o:9,q:x.q=='maj'?'min':'m7',bo:9}),tag:'I→vi（代理）'});
+  if(x.o==5&&isM(x.q)&&x.bo==5)K.push({i,t:'bor',f:()=>({o:5,q:x.q=='maj'?'min':'m7',bo:5}),tag:'IV→iv（借用）'});
+  if(x.o==9&&isN(x.q)&&x.bo==9)K.push({i,t:'bor',f:()=>({o:8,q:x.q=='min'?'maj':'maj7',bo:8}),tag:'vi→♭VI（借用）'})}
+ if(i>0){const pv=base[i-1];if(pv.o==0&&pv.bo==0&&(isM(pv.q)||pv.q=='min'||pv.q=='m7')&&(mn?pv.q=='min'||pv.q=='m7':isM(pv.q))&&[2,4,5,7,9].concat(mn?[3,8]:[]).includes(x.o)&&(isM(x.q)||isN(x.q))&&x.bo==x.o){const so=(x.o+7)%12;if(so!=pv.o)K.push({i:i-1,t:'sec',f:()=>({o:so,q:'d7',bo:so}),tag:'二次ドミナント（'+NAMES[0]+'→'+'V7/'+(['I','♭II','II','♭III','III','IV','♭V','V','♭VI','VI','♭VII','VII'][x.o])+'）'.replace(NAMES[0]+'→','')})}}
+ if((x.q=='maj'||x.q=='min')&&x.bo==x.o&&i<n-1){const th=(x.o+(x.q=='min'?3:4))%12,nx=base[i+1],nb=nx.bo,d=(nb-th+12)%12;if(d==1||d==2||d==10||d==11)K.push({i,t:'inv',f:()=>({o:x.o,q:x.q,bo:th}),tag:'転回形（第1転回）'})}}
+const r=Math.random(),big=n>=8,cnt=wantVar?(r<.4?1:r<.8?2:big?3:2):(r<.25?0:r<.7?1:2),hasT={};
+for(let k=0;k<cnt;k++){const av=K.filter(v=>!used.has(v.i)&&(big||!hasT[v.t]));if(!av.length)break;const v=av[R(av.length)];used.add(v.i);hasT[v.t]=1;
+ // secondary dominant also occupies the following chord
+ if(v.t=='sec')used.add(v.i+1);const nw=v.f();seq[v.i]=nw;tags.push((v.i+1)+'小節目：'+v.tag)}
+return{seq,tags}}
+function nTry(t,l){let best=null;const prac=new Set();if(S.test)D.log.forEach(e=>{if(e.m=='n'&&e.sg&&!e.cf)prac.add(e.sg)});
+for(let k=0;k<(S.test?40:1);k++){const v=nVar(t,!!S.test);if(!best)best=v;if(!S.test||!prac.has(nSig(v.seq))){best=v;break}}return best}
+function mkN(l){const key=kcKey(),sh=kcSh(),item=pick(LV.n[l],'n:'),t=NT[item];
+let seq=t.s.map(x=>({o:x[0],q:x[1],bo:x.length>2?x[2]:x[0]})),lab=t.l;if(l>=4&&l<=7){const v=nTry(t,l);seq=v.seq;if(v.tags.length)lab=t.l+'　→変形：'+v.tags.join('、')}
+const c={key,sh,item,mn:!!t.mn,seq,lab,si:0,ans:[],sr:[],sd:false,sfb:'',bl:!!(S.test||S.nb)};if(l>=6)c.mel=mkMel(c);return c}
+function mkMel(c){const ctr=74+Math.round((c.sh||0)/2),lo=ctr-7,hi=ctr+7,mel=[];let prev=ctr;
+c.seq.forEach(x=>{const pcs=XQ[x.q].map(y=>(c.key+x.o+y)%12),cand=[];for(let m=lo;m<=hi;m++)if(pcs.includes(((m%12)+12)%12))cand.push(m);
+const near=cand.slice().sort((a,b)=>Math.abs(a-prev)-Math.abs(b-prev)),a=near[R(Math.min(2,near.length))],b2=cand.filter(m=>m!=a&&Math.abs(m-a)<=5),b=b2.length?b2[R(b2.length)]:a;mel.push([a,b]);prev=b});return mel}
+function nVoice(c){const chs=c.seq.map(x=>XQ[x.q].map(y=>(c.key+x.o+y)%12));return{ups:voiceK(chs,c.sh||0),bs:c.seq.map(x=>bassK((c.key+x.bo)%12,c.sh||0))}}
+function playN(c,t,sp,part){const v=nVoice(c),N=[],bar=2*sp;c.seq.forEach((x,i)=>{const tt=t+i*bar;if(part!=1)tone(v.bs[i],tt,bar-.1*sp,.55,0);if(part!=0)v.ups[i].forEach(n=>tone(n,tt,bar-.1*sp,.3,0));if(c.mel&&part==null){tone(c.mel[i][0],tt,bar*.5-.05*sp,.38,0);tone(c.mel[i][1],tt+bar*.5,bar*.5-.05*sp,.38,0)}N.push([v.bs[i],...v.ups[i]])});if(!c.notes){c.notes=N;c.ck=1}return t+c.seq.length*bar+.3}
+function nPrompt(c){const st=nStep(c),n=NS[S.lv.n].length,k='主音は '+NAMES[c.key]+' です。'+(c.mel?'メロディも鳴ります（コードではありません）。':''),B=c.seq.length+'小節';
+const ins={mode:'この'+B+'は、長調ですか、短調ですか？',bass:B+'のベース音を、主音から見た度数で順に答えましょう。「ベースだけ」で聴けます。',root:'各コードのルート（根音）を、主音から見た度数で答えましょう。ベースと違うコードがあります。',qual:'各コードの種類を、順に答えましょう。「上声だけ」で聴けます。'}[st];
+return k+(c.bl?'【実力確認】最後まで答え合わせはしません。':'')+'ステップ '+(c.si+1)+'/'+n+'：'+ins}
+const nExp=(c,st)=>st=='mode'?[c.mn?'min':'maj']:st=='bass'?c.seq.map(x=>x.bo):st=='root'?c.seq.map(x=>x.o):c.seq.map(x=>x.q);
+function nRender(c){const st=nStep(c),len=nLen(c),lv=S.lv.n,E=nExp(c,st);
+const L=v=>st=='mode'?(v=='min'?'短調':'長調'):st=='qual'?NQN[v]:DEG[v];
+const r=c.sd?c.sr[c.sr.length-1]:null;
+$('#slots').style.gridTemplateColumns='repeat('+Math.min(len,4)+',1fr)';
+$('#slots').innerHTML=Array.from({length:len},(_,i)=>{const v=c.ans[i],cl=c.sd?(r&&r.res[i]?'ok':'ng'):'';return`<div class="slot ${cl}" ${c.done?`data-s="${i}" role="button" tabindex="0"`:''}>${v==null?'・':L(v)}${c.sd&&r&&!r.res[i]?`<small>正解 ${L(E[i])}</small>`:''}</div>`}).join('');
+const opts=st=='mode'?['maj','min']:st=='qual'?NQ[lv]:NDEG[lv];
+return opts.map(x=>`<button data-o="${x}" ${c.sd?'disabled':''}>${L(x)}</button>`).join('')+`<button data-undo="1" ${c.sd?'disabled':''}>⌫</button>`}
+function tapN(v){const c=S.cur;if(c.done||c.sd)return;if(/^\d+$/.test(v))v=+v;const st=nStep(c);if(c.ans.length>=nLen(c))return;c.ans.push(v);
+if(c.ans.length<nLen(c)){render();return}
+const E=nExp(c,st),res=c.ans.map((a,i)=>a==E[i]?1:0),n=res.reduce((a,b)=>a+b,0);
+c.sr.push({s:st,ok:n==res.length?1:0,n,len:res.length,res,ans:[...c.ans]});c.sd=true;
+const last=c.si>=NS[S.lv.n].length-1,lab=NSN[st]+'：'+(n==res.length?'正解':n+'/'+res.length);
+if(c.bl&&!last){c.sd=false;c.si++;c.ans=[];c.sfb='';render();return}
+if(last)nFinish(c);else{c.sfb=lab+'。次のステップへ進みましょう。';render()}}
+function nRev(c){const L=(s,v)=>s=='mode'?(v=='min'?'短調':'長調'):s=='qual'?(NQN[v]||v):DEG[v];
+return c.sr.map(x=>{if(x.ok)return NSN[x.s]+'：○';const E=nExp({seq:c.seq,mn:c.mn},x.s),w=[];x.ans.forEach((a,i)=>{if(a!=E[i])w.push((x.s=='mode'?'':(i+1)+'小節 ')+L(x.s,a)+'→'+L(x.s,E[i]))});return NSN[x.s]+'：×（'+w.join('、')+'）'}).join('\n')}
+function nFinish(c){c.ok=c.sr.every(x=>x.ok);c.done=true;const n=c.sr.reduce((a,x)=>a+x.n,0);bump('n:'+c.item,c.ok);logAcc(c.ok);
+rec(c,c.sr.map(x=>x.ans),c.item,c.ok,n,null);
+c.sfb=c.bl?(c.ok?'全ステップ正解！':'答え合わせ（回答→正解）')+'\n'+nRev(c)+'\n'+(c.lab||NT[c.item].l)+'（キー '+NAMES[c.key]+(c.mn?'マイナー':'メジャー')+'）：'+nCh(c).map(x=>x.n).join(' → '):(c.ok?'全ステップ正解！ ':'結果：')+c.sr.map(x=>NSN[x.s]+(x.ok?'○':x.n+'/'+x.len)).join('／')+'。'+(c.lab||NT[c.item].l)+'（キー '+NAMES[c.key]+(c.mn?'マイナー':'メジャー')+'）：'+nCh(c).map(x=>x.n).join(' → ');render()}
+function nAdv(){const c=S.cur;c.si++;c.ans=[];c.sd=false;c.sfb='';render()}
+const songMode=()=>S.m=='n'&&S.lv.n==8;
+const HARD=['キー','ベース','ルート','コードの種類','テンション','転回形','進行の流れ'],HM=['f','l','b','c','m','k','g'];
+const SGQ=['キーを推定','ベースラインを聴き取る','ルートを推定','クオリティを判別','機能・声部進行を確認','全体を確定'],SGC=['不明','一部','半分','ほぼ','確定'],RNM=['I','♭II','II','♭III','III','IV','♯IV','V','♭VI','VI','♭VII','VII'];
+function pcOf(t){const m=/^([A-G])([#♯b♭]?)/.exec(t);if(!m)return null;let p={C:0,D:2,E:4,F:5,G:7,A:9,B:11}[m[1]];if(m[2]=='#'||m[2]=='♯')p++;else if(m[2]=='b'||m[2]=='♭')p--;return{pc:((p%12)+12)%12,len:m[0].length}}
+function chDeg(tok,key){tok=tok.trim();if(!tok)return null;if(tok=='%'||tok=='-'||/^N\.?C\.?$/.test(tok))return{t:tok,rep:tok=='%'};if(/^[?？]+$/.test(tok))return{t:'？',unk:1};const r=pcOf(tok);if(!r)return{t:'？'+tok,bad:1};
+let rest=tok.slice(r.len),bass=null;const sl=rest.indexOf('/');if(sl>=0){const b=pcOf(rest.slice(sl+1));if(b)bass=b.pc;rest=rest.slice(0,sl)}
+const off=(r.pc-key+12)%12,minor=/^(min|m(?!aj)|dim|ø)/.test(rest);let rn=RNM[off];if(minor)rn=rn.toLowerCase();
+const suf=rest.replace(/^(min|m(?!aj))/,'').replace(/^dim/,'°').replace(/^ø/,'ø').replace(/b5/g,'♭5').replace(/b9/g,'♭9').replace(/#9/g,'♯9').replace(/#11/g,'♯11').replace(/b13/g,'♭13').replace(/M7/g,'maj7').replace(/\s/g,'');
+const q=cQ(rest);
+return{t:rn+suf+(bass!=null&&bass!=r.pc?'/'+DEG[(bass-key+12)%12]:''),off:off,bo:bass!=null?(bass-key+12)%12:off,th:q.th,fi:q.fi,sv:q.sv,ex:q.ex}}
+function cQ(rest){const s=rest.replace(/♭/g,'b').replace(/♯/g,'#').replace(/△/g,'maj7').replace(/M7/g,'maj7').replace(/M9/g,'maj9').replace(/\s/g,'');
+let th='M';if(/^(min|m(?!aj)|dim|ø)/.test(s))th='m';else if(/sus/.test(s))th='s';
+let fi='P';if(/^(dim|ø)|b5/.test(s))fi='d';else if(/aug|^\+|#5/.test(s))fi='a';
+let sv='';if(/dim7|°7/.test(s))sv='d7';else if(/maj(7|9|11|13)/.test(s))sv='M7';else if(/7|(^|[^a-z])(m|min)?(9|11|13)/.test(s)&&!/add/.test(s))sv='7';
+if(/^ø/.test(s)&&!sv)sv='7';
+const ex=((s.replace(/maj7|dim7/g,'').match(/(?:add)?b?#?(?:9|11|13)|(?<![0-9])6/g))||[]).sort().join(',');
+return{th:th,fi:fi,sv:sv,ex:ex}}
+function sgBars(txt,key){const bars=[];(txt||'').split(/[|｜\n]/).forEach(b=>{const cs=b.trim().split(/\s+/).filter(Boolean).map(x=>chDeg(x,key)).filter(Boolean);if(!cs.length)return;if(cs.length==1&&cs[0].rep&&bars.length)bars.push(bars[bars.length-1].slice());else bars.push(cs)});return bars}
+const sgTxt=b=>b.map(x=>x.t).join(' ');
+function lcsPairs(A,B,eq){const n=A.length,m=B.length,d=[];for(let i=0;i<=n;i++)d.push(new Array(m+1).fill(0));
+for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--)d[i][j]=eq(A[i],B[j])?d[i+1][j+1]+1:Math.max(d[i+1][j],d[i][j+1]);
+const mt=[];let i=0,j=0;while(i<n&&j<m){if(eq(A[i],B[j])){mt.push([i,j]);i++;j++}else if(d[i+1][j]>=d[i][j+1])i++;else j++}
+mt.push([n,m]);const out=[];let pi=0,pj=0;mt.forEach(([a,b])=>{const ga=a-pi,gb=b-pj,g=Math.max(ga,gb);for(let k=0;k<g;k++)out.push([k<ga?pi+k:null,k<gb?pj+k:null]);if(a<n)out.push([a,b]);pi=a+1;pj=b+1});return out}
+const cvalid=x=>x&&x.off!=null,cEq=(a,b)=>cvalid(a)&&cvalid(b)&&a.off==b.off&&a.bo==b.bo&&a.th==b.th&&a.fi==b.fi&&a.sv==b.sv&&a.ex==b.ex;
+function sgCmp(mb,rb){const r={R:0,ex:0,rt:0,bs:0,q:0,tex:0,tags:{},list:[],skip:0,unk:0,shift:mb.length!=rb.length};
+const tag=(k)=>{r.tags[k]=(r.tags[k]||0)+1};
+lcsPairs(mb,rb,(a,b)=>sgTxt(a)==sgTxt(b)).forEach(([mi,ri])=>{const A=mi==null?[]:mb[mi],B=ri==null?[]:rb[ri],bn=ri!=null?ri+1:null;
+lcsPairs(A,B,cEq).forEach(([ai,bi])=>{const a=ai==null?null:A[ai],b=bi==null?null:B[bi];
+if(b&&(b.bad||b.unk)){r.skip++;return}if(b&&!cvalid(b))return;
+if(!b){if(a&&a.bad)r.skip++;if(cvalid(a)){tag('余分なコード');r.list.push({n:bn||('自'+(mi+1)),a:a.t,b:'−',g:['余分なコード']})}return}
+if(a&&a.bad){r.skip++;return}
+if(a&&a.unk){r.unk++;return}
+if(cvalid(a)&&cvalid(b)&&a.off==b.off&&a.bo==b.bo&&a.th==b.th&&a.fi==b.fi&&a.sv==b.sv&&a.ex!=b.ex){r.tex++;r.list.push({n:bn,a:a.t,b:b.t,g:['テンション差・要確認']});return}
+r.R++;if(!a||!cvalid(a)){tag('抜け');r.list.push({n:bn,a:a?a.t:'−',b:b.t,g:['抜け']});return}
+const g=[];if(a.off==b.off)r.rt++;if(a.bo==b.bo)r.bs++;const qs=a.th==b.th&&a.fi==b.fi&&a.sv==b.sv;if(qs)r.q++;
+if(cEq(a,b)){r.ex++;return}
+if(a.off!=b.off)g.push('ルート違い');else{if(a.bo!=b.bo)g.push('ベース違い（転回形）');if(a.th!=b.th)g.push('3rd（長短）');if(a.fi!=b.fi)g.push('5thの変化');if(a.sv!=b.sv)g.push('7thの有無・種類');}
+g.forEach(tag);r.list.push({n:bn,a:a.t,b:b.t,g:g})})});return r}
+function sgCur(){return D.songs.find(x=>x.id==S.sgi)||null}
+function esc(x){return String(x==null?'':x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c])}
+const CHAL=[
+{id:'c01',no:1,t:'Stand By Me',a:'Ben E. King',st:1,r:'歌の冒頭8小節',th:'ベース、基本4コード',g:1},
+{id:'c02',no:2,t:'チェリー',a:'スピッツ',st:2,r:'Aメロ冒頭8小節',th:'ダイアトニック、Major/Minor',g:1},
+{id:'c03',no:3,t:'ルージュの伝言',a:'荒井由実',st:2,r:'Aメロ冒頭8小節',th:'コード機能、ベースの動き',g:1},
+{id:'c04',no:4,t:'マリーゴールド',a:'あいみょん',st:3,r:'Aメロ冒頭8小節',th:'分数コード、下降ベース',g:1},
+{id:'c05',no:5,t:'上を向いて歩こう',a:'坂本九',st:3,r:'Aメロ冒頭4〜8小節',th:'7th、ドミナント',g:2},
+{id:'c06',no:6,t:'卒業写真',a:'荒井由実',st:3,r:'Aメロ冒頭8小節',th:'Ⅱ–Ⅴ、7th、コード機能',g:2},
+{id:'c07',no:7,t:'クリスマス・イブ',a:'山下達郎',st:3,r:'Aメロ冒頭8小節',th:'分数コード、下降ベース',g:2},
+{id:'c08',no:8,t:'Watermelon Man',a:'Herbie Hancock',st:3,r:'テーマの5〜12小節',th:'ブルース、ドミナント7th',g:2},
+{id:'c09',no:9,t:'All of Me',a:'Jazz Standard',st:4,r:'テーマ冒頭8小節',th:'セカンダリードミナント',g:2},
+{id:'c10',no:10,t:'丸の内サディスティック',a:'椎名林檎',st:4,r:'Aメロ冒頭4〜8小節',th:'7th、循環進行',g:3},
+{id:'c11',no:11,t:'真夜中のドア',a:'松原みき',st:4,r:'Aメロ冒頭4〜8小節',th:'maj7、m7、テンション',g:3},
+{id:'c12',no:12,t:"Take the 'A' Train",a:'Jazz Standard',st:4,r:'Aセクション冒頭8小節',th:'Ⅱ7、Ⅱm7、ドミナント',g:3},
+{id:'c13',no:13,t:'Satin Doll',a:'Jazz Standard',st:5,r:'Aセクション冒頭4〜8小節',th:'連続Ⅱ–Ⅴ、声部進行',g:3}];
+const chStars=n=>'★'.repeat(n)+'☆'.repeat(5-n),chSong=id=>D.songs.find(x=>x.cid==id),chStore=id=>D.chal&&D.chal[id]&&D.chal[id].st;
+function chState(id){const st=chStore(id);if(st=='done')return'完了';if(st=='known')return'既習';return chSong(id)?'採譜中':'未着手'}
+function chStart(x){const ch=CHAL.find(z=>z.id==x);if(!ch)return null;let g=chSong(x);if(!g){if(D.songs.length>=100)return null;g={id:'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),cid:x,title:ch.t,key:null,mn:false,memo:'課題：'+ch.a+'／練習テーマ：'+ch.th,chk:[0,0,0,0,0,0],sec:[{name:ch.r,mine:'',ref:'',conf:0,hist:[]}],t:Date.now(),upd:Date.now()};D.songs.push(g);save()}
+S.sgi=g.id;S.sgdel=null;return g}
+function chalHTML(){const L=CHAL.slice().sort((a,b)=>a.st-b.st||a.no-b.no),cnt={};L.forEach(x=>{const k=chState(x.id);cnt[k]=(cnt[k]||0)+1});
+let h=`<details id="chal" ${S.chOpen?'open':''} style="margin-bottom:12px;border:1px solid var(--bd);border-radius:10px;padding:8px 10px"><summary style="font-weight:600;cursor:pointer">採譜チャレンジ（おすすめ13曲）<span class="muted small">　採譜中 ${cnt['採譜中']||0}／完了 ${cnt['完了']||0}／既習 ${cnt['既習']||0}</span></summary>
+<p class="muted small" style="margin:6px 0">週1回ほど、実際の曲の4〜8小節を採譜するためのお題です。難易度は「コード進行を聴き取る難しさ」の暫定評価で、録音やアレンジによって変わります。コード進行の正解は入っていません。採譜範囲は、ノートのセクション名で自由に変えられます。</p>`;
+L.forEach(x=>{const sel=S.chSel==x.id,sg=chSong(x.id),stt=chState(x.id),cand=sg&&chStore(x.id)!='done'&&sg.chk&&sg.chk.length==6&&sg.chk.every(v=>v);
+h+=`<button data-ch="sel:${x.id}" class="${sel?'on':''}" style="display:flex;justify-content:space-between;gap:6px;width:100%;text-align:left;margin-top:6px;min-height:44px"><span>${esc(x.t)}</span><span class="small" style="white-space:nowrap">${chStars(x.st)} ${stt}${cand?'（完了候補）':''}</span></button>`;
+if(sel)h+=`<div style="padding:8px 10px;border:1px solid var(--bd);border-radius:8px;margin-top:4px"><p style="margin:0 0 4px"><b>${esc(x.t)}</b>／${esc(x.a)}</p><p class="small" style="margin:2px 0">難易度：${chStars(x.st)}（暫定）</p><p class="small" style="margin:2px 0">おすすめ範囲：${esc(x.r)}</p><p class="small" style="margin:2px 0">練習テーマ：${esc(x.th)}</p><p class="small muted" style="margin:2px 0">目安：Stage ${x.g}（${['基本的なコード進行','7thコードと機能和声','ジャズ的な和声・複雑なコード'][x.g-1]}）</p>
+<div class="row" style="margin-top:8px"><button data-ch="start:${x.id}" class="on" style="min-height:40px">${sg?'ノートを開く':'採譜を始める'}</button></div>
+<div class="row" style="margin-top:6px"><button data-ch="st:${x.id}:${chStore(x.id)=='done'?'none':'done'}" style="font-size:13px;min-height:36px">${chStore(x.id)=='done'?'完了を取り消す':'完了にする'}</button><button data-ch="st:${x.id}:${chStore(x.id)=='known'?'none':'known'}" style="font-size:13px;min-height:36px">${chStore(x.id)=='known'?'既習を取り消す':'既習にする（前から知っている曲）'}</button></div>${cand?'<p class="small" style="margin:6px 0 0">採譜の6項目がすべてチェック済みです。答え合わせが済んだら「完了にする」を押してください。</p>':''}</div>`});
+return h+'</details>'}
+function songUI(){const box=$('#song');let g=sgCur();if(!g&&D.songs.length){S.sgi=D.songs[0].id;g=D.songs[0]}
+let h=chalHTML()+`<div id="sgnote" style="font-weight:600">採譜ノート（自分の曲）</div><p class="muted small" style="margin:4px 0 8px">お手持ちの音源（CD・配信・自分の録音など）を聴きながら記録します。音源そのものはアプリに入りません。手順は「キー→ベース→ルート→クオリティ→機能・声部→全体確定」。行き来しながら進めて構いません。</p><div class="row">`;
+h+=D.songs.map(x=>`<button data-sg="sel:${x.id}" class="${g&&g.id==x.id?'on':''}">${esc(x.title||'無題')}</button>`).join('')+`<button data-sg="new">＋ 新しい曲</button></div>`;
+if(!g){box.innerHTML=h+'<p class="small muted">曲がまだありません。「＋ 新しい曲」または上の採譜チャレンジから始めましょう。</p>';return}
+const kset=Number.isInteger(g.key),key=kset?g.key:0,chd=g.cid&&CHAL.find(x=>x.id==g.cid);
+h+=`<div style="margin-top:10px"><label class="small">曲名</label><input data-sf="title" value="${esc(g.title)}" style="width:100%;box-sizing:border-box;min-height:40px;font-size:16px"></div>
+<div class="row" style="margin-top:8px"><div style="flex:1"><label class="small">キー（主音）</label><select data-sf="key" style="width:100%;min-height:40px;font-size:16px">${kset?'':'<option value="" selected>（選んでください）</option>'}${NAMES.map((n,i)=>`<option value="${i}" ${kset&&i==key?'selected':''}>${n}</option>`).join('')}</select></div><div style="flex:1"><label class="small">調</label><select data-sf="mn" style="width:100%;min-height:40px;font-size:16px"><option value="0" ${g.mn?'':'selected'}>長調</option><option value="1" ${g.mn?'selected':''}>短調</option></select></div></div>
+${chd?`<p class="small" style="margin:8px 0 0">課題：${esc(chd.a)}／${chStars(chd.st)}／おすすめ範囲：${esc(chd.r)}／練習テーマ：${esc(chd.th)}</p>`:''}${kset?'':'<p class="small" style="margin:8px 0 0"><b>キーは未設定です。</b>聴いて判断し、キーを選ぶと、度数表記と答え合わせが表示されます。</p>'}<p class="small" style="margin:10px 0 4px">採譜の進み具合</p><div class="row">${SGQ.map((q,i)=>`<button data-sg="chk:${i}" class="${g.chk[i]?'on':''}" style="font-size:13px;min-height:36px">${g.chk[i]?'✓ ':''}${i+1}.${q}</button>`).join('')}</div>`;
+g.sec.forEach((c,i)=>{const mb=kset?sgBars(c.mine,key):[],rb=kset?sgBars(c.ref,key):[];let cmp='';
+if(mb.length){cmp+=`<p class="small" style="margin:6px 0 2px">度数表記（自分の採譜）：<b>${mb.map(sgTxt).join(' | ')}</b></p>`}
+if(mb.length&&rb.length){const n=Math.max(mb.length,rb.length);let ok=0,rows='';for(let k=0;k<n;k++){const a=mb[k]?sgTxt(mb[k]):'−',b=rb[k]?sgTxt(rb[k]):'−',m=a==b;if(m)ok++;rows+=`<tr><td>${k+1}</td><td>${esc(a)}</td><td>${esc(b)}</td><td>${m?'○':'×'}</td></tr>`}
+cmp+=`<p class="small" style="margin:6px 0 2px">答え合わせ：${n}小節中 ${ok}小節一致（${Math.round(ok/n*100)}%）</p><table class="st"><tr><th>小節</th><th>自分</th><th>答え</th><th></th></tr>${rows}</table>`;
+const z=sgCmp(mb,rb),pc=v=>z.R?Math.round(v/z.R*100)+'%':'−';
+cmp+=`<p class="small" style="margin:10px 0 2px"><b>詳しい答え合わせ</b>（答えのコード ${z.R}個が対象${z.tex?'。テンション差だけの'+z.tex+'個は要確認として除外':''}${z.shift?'。小節数が違うので位置合わせして比較':''}）</p><table class="st"><tr><th>コード一致</th><th>ルート</th><th>ベース</th><th>クオリティ</th></tr><tr><td>${z.ex}/${z.R}（${pc(z.ex)}）</td><td>${z.rt}/${z.R}（${pc(z.rt)}）</td><td>${z.bs}/${z.R}（${pc(z.bs)}）</td><td>${z.q}/${z.R}（${pc(z.q)}）</td></tr></table>`;
+const tk=Object.keys(z.tags);if(tk.length)cmp+=`<p class="small" style="margin:6px 0 2px">間違いの種類：${tk.map(k=>k+' '+z.tags[k]).join('／')}</p>`;
+if(z.list.length)cmp+=`<table class="st"><tr><th>小節</th><th>自分</th><th>答え</th><th>分類</th></tr>${z.list.slice(0,40).map(x=>`<tr><td>${x.n}</td><td>${esc(x.a)}</td><td>${esc(x.b)}</td><td>${x.g.join('・')}</td></tr>`).join('')}</table>`;
+if(z.unk)cmp+=`<p class="small" style="margin:4px 0">聴き取れなかった（？）コード：${z.unk}個（採点には入れていません）</p>`;
+const hs=(c.hist||[]).filter(h=>h.k=='cmp');let pv=hs[hs.length-1];if(pv&&pv.R==z.R&&pv.ex==z.ex&&pv.rt==z.rt&&pv.bs==z.bs&&pv.q==z.q)pv=hs[hs.length-2];
+if(pv&&pv.R&&z.R){const f=(a,b)=>Math.round(a/b*100);cmp+=`<p class="small" style="margin:4px 0">前回の記録（${new Date(pv.t).toLocaleDateString()}）→ 今回：コード一致 ${f(pv.ex,pv.R)}%→${f(z.ex,z.R)}%／ベース ${f(pv.bs,pv.R)}%→${f(z.bs,z.R)}%／クオリティ ${f(pv.q,pv.R)}%→${f(z.q,z.R)}%</p>`}
+if(z.skip)cmp+=`<p class="small muted" style="margin:4px 0">読み取れない表記が${z.skip}個あり、採点から除きました。</p>`;
+cmp+=`<p class="small muted" style="margin:4px 0">※クオリティはテンションを除いた3rd・5th・7thの比較です。ルート・ベース・3rd・5th・7thが同じでテンションだけ違うコード（${z.tex}個）は「テンション差・要確認」とし、上の一致率の分母にも誤りの集計にも入れていません。</p><div class="row"><button data-sg="rec:${i}" style="font-size:13px;min-height:36px">${S.sgrec==g.id+':'+i?'✓ 記録しました':'この結果を記録'}</button></div>`}
+h+=`<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--bd)"><div class="row" style="align-items:center"><input data-sf="sec:${i}:name" value="${esc(c.name)}" style="flex:1;min-height:40px;font-size:16px"><button data-sg="delsec:${i}" style="flex:0 0 auto;min-height:36px;font-size:13px">削除</button></div>
+<label class="small">自分の採譜（コード名を、小節ごとに | で区切って入力。例：| C G/B | Am Em |　聴き取れないコードは ? と書きます）</label><textarea data-sf="sec:${i}:mine" rows="3" style="width:100%;box-sizing:border-box;font-size:16px">${esc(c.mine)}</textarea>
+<label class="small">答え（楽譜やコード譜サイトなどで確認した進行。あとで入力）</label><textarea data-sf="sec:${i}:ref" rows="3" style="width:100%;box-sizing:border-box;font-size:16px">${esc(c.ref)}</textarea>
+<label class="small">難所メモ（聴き取りにくかった箇所・気づいたこと）</label><textarea data-sf="sec:${i}:memo" rows="2" style="width:100%;box-sizing:border-box;font-size:16px">${esc(c.memo)}</textarea>
+<label class="small">音源の位置メモ（例：1:23 サビ頭）</label><input data-sf="sec:${i}:tc" value="${esc(c.tc)}" style="width:100%;box-sizing:border-box;min-height:40px;font-size:16px">
+<p class="small" style="margin:6px 0 2px">迷ったところ（当てはまるものを選択）</p><div class="row">${HARD.map((n,k)=>`<button data-sg="hard:${i}:${k}" class="${(c.hard||[]).includes(k)?'on':''}" style="font-size:13px;min-height:36px">${(c.hard||[]).includes(k)?'✓ ':''}${n}</button>`).join('')}</div>
+<p class="small" style="margin:6px 0 2px">採れた度合い（自己評価）</p><div class="row">${SGC.map((n,k)=>`<button data-sg="conf:${i}:${k+1}" class="${c.conf==k+1?'on':''}" style="font-size:13px;min-height:36px">${k+1} ${n}</button>`).join('')}</div>${cmp}</div>`});
+h+=`<div class="row" style="margin-top:12px"><button data-sg="addsec">＋ セクションを追加</button></div><label class="small" style="display:block;margin-top:10px">メモ（聴き取りのコツ、迷った箇所など）</label><textarea data-sf="memo" rows="3" style="width:100%;box-sizing:border-box;font-size:16px">${esc(g.memo)}</textarea><div class="row" style="margin-top:10px"><button data-sg="del" style="font-size:13px;min-height:36px">${S.sgdel==g.id?'本当に削除（もう一度押す）':'この曲を削除'}</button></div>`;
+box.innerHTML=h}
+function sgSave(g){if(g)g.upd=Date.now();save()}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-sg]');if(!t)return;const [a,x,y]=t.dataset.sg.split(':'),g=sgCur();
+if(a=='new'){if(D.songs.length>=100)return;const n={id:Date.now().toString(36),title:'',key:0,mn:false,memo:'',chk:[0,0,0,0,0,0],sec:[{name:'Aメロ',mine:'',ref:'',conf:0,hist:[]}],t:Date.now(),upd:Date.now()};D.songs.push(n);S.sgi=n.id;save()}
+else if(a=='sel'){S.sgi=x;S.sgdel=null}
+else if(!g)return;
+else if(a=='chk'){g.chk[+x]=g.chk[+x]?0:1;sgSave(g)}
+else if(a=='conf'){const c=g.sec[+x];c.conf=+y;(c.hist=c.hist||[]).push({t:Date.now(),c:+y});if(c.hist.length>50)c.hist.shift();sgSave(g)}
+else if(a=='hard'){const c=g.sec[+x];c.hard=c.hard||[];const k=+y,j=c.hard.indexOf(k);c.hardT=c.hardT||{};if(j>=0){c.hard.splice(j,1);delete c.hardT[k]}else{c.hard.push(k);c.hardT[k]=Date.now()}sgSave(g)}
+else if(a=='rec'){if(!Number.isInteger(g.key))return;const c=g.sec[+x],z=sgCmp(sgBars(c.mine,g.key),sgBars(c.ref,g.key));if(z.R){(c.hist=c.hist||[]).push({t:Date.now(),k:'cmp',R:z.R,ex:z.ex,rt:z.rt,bs:z.bs,q:z.q,g:z.tags});if(c.hist.length>50)c.hist.shift();sgSave(g);S.sgrec=g.id+':'+x}}
+else if(a=='addsec'){if(g.sec.length<30){g.sec.push({name:'セクション'+(g.sec.length+1),mine:'',ref:'',conf:0,hist:[]});sgSave(g)}}
+else if(a=='delsec'){if(g.sec.length>1){g.sec.splice(+x,1);sgSave(g)}}
+else if(a=='del'){if(S.sgdel==g.id){D.songs=D.songs.filter(z=>z.id!=g.id);S.sgi=D.songs.length?D.songs[0].id:null;S.sgdel=null;save()}else{S.sgdel=g.id}}
+songUI()});
+document.addEventListener('toggle',e=>{if(e.target&&e.target.id=='chal')S.chOpen=e.target.open},true);
+document.addEventListener('click',e=>{const t=e.target.closest('[data-ch]');if(!t)return;const [a,x,y]=t.dataset.ch.split(':'),ch=CHAL.find(z=>z.id==x);if(!ch)return;
+if(a=='sel')S.chSel=S.chSel==x?null:x;
+else if(a=='st'){D.chal=D.chal||{};if(y=='none')delete D.chal[x];else D.chal[x]={st:y,t:Date.now()};save()}
+else if(a=='start'){if(!chStart(x))return;songUI();const n=$('#sgnote');if(n)n.scrollIntoView({block:'start'});return}
+songUI()});
+document.addEventListener('change',e=>{const t=e.target.closest('[data-sf]');if(!t)return;const g=sgCur();if(!g)return;const f=t.dataset.sf;
+if(f=='title')g.title=t.value.slice(0,80);else if(f=='key')g.key=t.value===''?null:+t.value;else if(f=='mn')g.mn=t.value=='1';else if(f=='memo')g.memo=t.value.slice(0,2000);
+else if(f.startsWith('sec:')){const [,i,k]=f.split(':'),c=g.sec[+i];if(c)c[k]=t.value.slice(0,2000)}
+sgSave(g);songUI()});
+const MO=['i','b','l','c','q','f','g','p','h','k','j','m','n'];
+const M={
+n:{n:'実曲採譜',d:['4小節・三和音・基本形（長調）：ベース→コードの種類','4小節・三和音（長調／短調）：調→ベース→種類','4小節・7thコード：調→ベース→種類','4小節・転回形／分数コード：調→ベース→ルート→種類','様式別の4小節（J-POP・歌謡曲・ジャズ）：調→ベース→ルート→種類','8小節の進行（カノン・J-POP・小室・歌謡曲・ジャズ）：調→ベース→ルート→種類','メロディ付き4小節：メロディは無視してコードを採る','メロディ付き8小節：メロディは無視してコードを採る','自分の曲の採譜ノート：記録・自己採点・答え合わせ（Stage 4）'],h:'採譜の手順で進みます：調を判断→ベースを聴き取る→ルート→コードの種類。キーの主音は表示されます。'},
+m:{n:'テンション',d:['ドミナント7th：9th・13th','maj7：9th・♯11・13th','m7：9th・11th・13th','オルタード：♭9・♯9・♯11・♭13','総合：ドミナント','ii–V–I：Vのテンション'],h:''},
+k:{n:'分数コード',d:['ベースは？：ルートか3rd（コード名あり）','ベースは？：ルート・3rd・5th','ベースは？：7thコード（ルート〜7th）','ベースは？：コード名なし（三和音）','ベースは？：コード名なし（7thコード）','進行：転回形のある2コード','進行：転回形のある3コード','進行：転回形のある4コード','進行：総合'],h:''},
+j:{n:'発展進行',d:['二次ドミナント：2コード','二次ドミナント：3コード','二次ドミナント：4コード','ii–V–I：長調と短調','短調の進行（ii–V–i・アンダルシア等）','総合（二次ドミナント＋短調）','借用和音：2コード（ivm・♭VII・♭VI・♭III）','借用和音：3コード','借用和音：4コード','借用和音＋二次ドミナント 総合','裏コード：2コード','裏コード：3コード','裏コード：4コード','経過ディミニッシュ：3コード','経過ディミニッシュ：4コード','裏コード＋経過ディミニッシュ 総合'],h:''},
+h:{n:'ガイドトーン',d:['3rd 単独（長3度・短3度）','7th 単独（長7度・短7度）','3rd＋7th → コードの質（ルートと同時）','3rd＋7th → コードの質（ルートを先に）','ガイドトーンの進行：ii–V–I（長調・短調）','ガイドトーンの進行：3コード4種','ガイドトーンの進行：4コード5種（ルートあり）','ガイドトーンの進行：4コード5種（ルートなし）'],h:''},
+g:{n:'進行パターン',d:['2コード（基本）','2コード（拡張）','3コード（定番）','3コード（拡張・iv）','4コード（定番）','4コード（全パターン）'],h:''},
+f:{n:'コード機能',d:['I・V（2択）','I・IV・V','I・IV・V・vi','I・ii・IV・V・vi','ダイアトニック7和音','機能：T・S・D','2コードの終止形','3コードの進行（ii–V–I など）'],h:''},
+i:{n:'音程',d:['同音・上行・下行','上行：5度・8度','上行：4度・8度','上行：4度・5度（違いの練習）','上行：4度・5度・8度','上行：長3度・5度・8度','上行：短3度・長3度','上行：3度・4度・5度','上行：2度・3度','上行：2度〜5度','上行：6度・7度','上行：全12種','下行：4度・5度（違いの練習）','下行：3度・4度・5度・8度','下行：全12種','上行・下行ミックス：全12種'],h:'2つの音が順に鳴ります。Lv1は同音・上行・下行の判別、Lv2以降は2音間の音程（音の開き）を答えます。絶対音感は不要です。'},
+l:{n:'ベースライン',d:['2音（1・5度）','3音（1・4・5度）','3音（ダイアトニック）','4音（ダイアトニック）','4音（12音）'],h:'カデンツ（I–IV–V–I）でキーを確認した後、低い音が2〜4つ順に鳴ります。主音から見た度数を、聴いた順にタップしてください。「主音」ボタンでいつでも基準を聴けます。'},
+q:{n:'和音の質',d:['メジャー／マイナー','メジャー vs 7（ドミナント）','メジャー系3種（maj・maj7・7）','マイナー vs m7','基本5種（maj・min・maj7・m7・7）','全11種（基本形）','ボイシング・音色ランダム（総合）'],h:'鳴ったコードの質は？（ルートは毎回ランダム。全11種以上のレベルでは、低音のルートを強めに鳴らします）'},
+b:{n:'ベース度数',d:['1と5の2択','1・4・5度','ダイアトニック7音','12音すべて'],h:'カデンツ（I–IV–V–I）でキーを確認した後に、1音が鳴ります。主音から見て何度？「主音」ボタンでいつでも基準を聴けます。'},
+c:{n:'和音の構成音',d:CL.map(x=>x.n),h:''},
+p:{n:'進行ディクテーション',d:['2コード（I・IV・V）','3コード（I・IV・V）','4コード定番（I・IV・V・vi）','4コード定番（I〜vi）','4コード ランダム（三和音）','4コード ランダム（7th）','声部連結：4コード（三和音）— ベースが独立し、上声がなめらかにつながる','声部連結：4コード（7thコード）','声部連結＋転回形：4コード（三和音）— 転回形でもコードの度数で答える','声部連結＋転回形：4コード（7thコード）','転回形まで答える：4コード（三和音）— コードの度数と、ベースの音（転回形）','転回形まで答える：4コード（7thコード）'],h:'カデンツの後にコードが順に鳴ります。ローマ数字で順に答えましょう。Lv7以降は、実際の演奏に近い声部連結（ベース＋上声）で鳴ります。'}};
+let D;try{D=JSON.parse(localStorage.getItem('etv2'))}catch(e){}
+const SCHEMA=5,SK=['3rd','5th','7th','solo','cond','tension','prog','song'],SKN={'3rd':'3rd','5th':'5th','7th':'7th',solo:'単独認識',cond:'音域・転回形',tension:'テンション',prog:'進行内',song:'実曲'},SKQ={maj:['3rd'],min:['3rd'],maj7:['7th'],m7:['7th','3rd'],dom7:['7th'],m7b5:['5th','7th'],dim7:['5th','7th'],sus4:[],sus2:[],add9:['tension'],aug:['5th']},AMB={aug:1,dim7:1,sus2:1,sus4:1},REG={low:52,mid:64,high:76},ABIL=['interval','bass','quality','quality_cmp','quality_solo','function','progression','guide','advanced','tension','song'],ABM={q:'quality',b:'bass',p:'progression',i:'interval',l:'bass',f:'function',g:'progression',h:'guide',j:'progression',k:'bass',m:'tension',n:'song'},ABN={quality_cmp:'比較聴取',quality_solo:'単独判別',interval:'音程',bass:'ベース音',quality:'コードの質',function:'調性・機能',progression:'進行',guide:'ガイドトーン',advanced:'発展進行',tension:'テンション',song:'実曲'};
+function migrate(o){o=o&&typeof o=='object'&&!Array.isArray(o)?o:{};o.acc=o.acc||{};o.miss=o.miss||{};o.lv=o.lv||{q:0,b:0,p:0};
+if(o.qv!=2){['q0','q1','q2','q3'].forEach(k=>delete o.acc[k]);o.qv=2}
+if((o.schema||2)<5){(Array.isArray(o.log)?o.log:[]).forEach(e=>{if(e&&e.m=='c'&&!e.lid)e.lid=e.ph=='cmp'?PRID[e.pr]:CIDS[e.lv]});Object.keys(CIDS).forEach(i=>{if(o.acc['c'+i])o.acc['c.'+CIDS[i]]=o.acc['c'+i];delete o.acc['c'+i]});delete o.acc.c4;delete o.acc.c6;const oi=o.lv.c,nid=CIDS[oi]||(oi==4?'7k.a':oi==6?'5a.cmp':null);o.lv.c=nid?Math.max(0,CL.findIndex(x=>x.id==nid)):0}
+['q','b','p','c','i','l','f','g','h','j','k','m','n'].forEach(k=>{o.lv[k]=Math.min(Math.max(+o.lv[k]||0,0),M[k].d.length-1)});
+o.log=Array.isArray(o.log)?o.log:[];o.seen=o.seen||{};o.it=o.it||{};o.songs=Array.isArray(o.songs)?o.songs.filter(x=>x&&typeof x=='object').slice(0,100):[];o.set=o.set&&typeof o.set=='object'&&!Array.isArray(o.set)?o.set:{};o.pass2=o.pass2&&typeof o.pass2=='object'&&!Array.isArray(o.pass2)?o.pass2:{};o.cdep=o.cdep&&typeof o.cdep=='object'&&!Array.isArray(o.cdep)?o.cdep:{};Object.keys(o.cdep).forEach(k=>{if(!Number.isInteger(o.cdep[k])||o.cdep[k]<0||o.cdep[k]>5)delete o.cdep[k]});o.chal=o.chal&&typeof o.chal=='object'&&!Array.isArray(o.chal)?o.chal:{};Object.keys(o.chal).forEach(k=>{const v=o.chal[k];if(!/^c\d\d$/.test(k)||!v||(v.st!='done'&&v.st!='known'))delete o.chal[k]});o.abil=o.abil||{};
+ABIL.forEach(k=>{o.abil[k]=Object.assign({n:0,ok:0,nn:0,nok:0,last:0,r:[]},o.abil[k])});
+o.skill=o.skill||{};SK.forEach(k=>{o.skill[k]=Object.assign({n:0,ok:0,nn:0,nok:0,last:0,r:[]},o.skill[k])});o.cnd=o.cnd||{};o.seen2=o.seen2||{};o.conf=o.conf||{};o.el=o.el||{};o.srs=o.srs&&typeof o.srs=='object'?o.srs:{};o.les=Array.isArray(o.les)?o.les:[];o.pass=o.pass&&typeof o.pass=='object'&&!Array.isArray(o.pass)?o.pass:{};o.tests=Array.isArray(o.tests)?o.tests:[];o.diag=Array.isArray(o.diag)?o.diag:[];if(!o.iv){Object.keys(o.acc).forEach(k=>{if(/^i\d+$/.test(k))delete o.acc[k]});o.log.forEach(e=>{if(e&&e.m=='i'){e.lv0=e.lv;e.lv=-1}});o.lv.i=0;Object.keys(o.pass).forEach(k=>{if(/^i\d/.test(k))delete o.pass[k]});o.tests=o.tests.filter(t=>!/^i\d/.test(t.key||''));o.diag=o.diag.filter(t=>t.m!='i');o.iv=2}
+if(o.iv==2){const IM={0:0,1:1,2:4,3:5,4:6,5:7,6:8,7:9,8:10,9:11,10:13,11:14,12:15},mp=n=>n in IM?IM[n]:n;
+const na={};Object.keys(o.acc).forEach(k=>{const m=/^i(\d+)$/.exec(k);na[m?'i'+mp(+m[1]):k]=o.acc[k]});o.acc=na;
+o.log.forEach(e=>{if(e&&e.m=='i'&&e.lv>=0){e.lv=mp(e.lv);if(e.tid)e.tid='i.L'+(e.lv+1)}});o.lv.i=mp(o.lv.i);
+const np={};Object.keys(o.pass).forEach(k=>{const m=/^i(\d+)$/.exec(k);np[m?'i'+mp(+m[1]):k]=o.pass[k]});o.pass=np;
+o.tests.forEach(t=>{const m=/^i(\d+)$/.exec(t.key||'');if(m)t.key='i'+mp(+m[1])});o.diag.forEach(t=>{if(t.m=='i'){t.place=mp(t.place);(t.st||[]).forEach(x=>x.l=mp(x.l))}});o.iv=3}
+o.schema=SCHEMA;return o}
+D=migrate(D);
+const save=()=>{try{D.set=getSet();const o=S.test?Object.assign({},D,{lv:Object.assign({},D.lv,S.test.sv)}):D;localStorage.setItem('etv2',JSON.stringify(o))}catch(e){}};
+const S={m:'q',sess:Date.now().toString(36),lv:D.lv,slow:false,loop:false,cur:null};
+S.cd={reg:'mid',inv:0,vc:'close',tb:0};S.ic={root:'r',reg:'any'};S.kc={key:'r',reg:'mid'};
+function getSet(){return{kc:S.kc,cd:S.cd,ic:S.ic,fn:S.fn||'roman',rootFix:S.rootFix!==false,nb:!!S.nb}}
+const APPC={app:1,kc:{key:'r',reg:'any'},cd:{reg:'rand',inv:'rand',vc:'rand',tb:'rand'},ic:{root:'r',reg:'any'},rootFix:false},CC=()=>S.test?(S.test.cond||{kc:{key:'r',reg:'mid'},cd:{reg:'mid',inv:0,vc:'close',tb:0},ic:{root:'r',reg:'any'},rootFix:true}):S.appc?APPC:(S.les&&dpOn(S.m))?dpCond(S.m,D.cdep[dpKey(S.m)]):getSet();
+function loadSet(){const t=D.set||{},ok=(v,a)=>a.includes(v),kn=v=>v==='r'||(Number.isInteger(v)&&v>=0&&v<12);
+if(t.kc){if(kn(t.kc.key))S.kc.key=t.kc.key;if(ok(t.kc.reg,['any','low','mid','high']))S.kc.reg=t.kc.reg}
+if(t.ic){if(kn(t.ic.root))S.ic.root=t.ic.root;if(ok(t.ic.reg,['any','low','mid','high']))S.ic.reg=t.ic.reg}
+if(t.cd){if(ok(t.cd.reg,['low','mid','high']))S.cd.reg=t.cd.reg;if(ok(t.cd.inv,[0,1,2,3]))S.cd.inv=t.cd.inv;if(ok(t.cd.vc,['close','open']))S.cd.vc=t.cd.vc;if(ok(t.cd.tb,[0,1]))S.cd.tb=t.cd.tb}
+if(ok(t.fn,['roman','name']))S.fn=t.fn;if(t.rootFix===false)S.rootFix=false;if(t.nb===true)S.nb=true}
+loadSet();
+function condTxt(m,c){if(c.app)return 'キー・音域・ルート・転回形・ボイシングをすべてランダム';const RG={any:'全域',low:'低',mid:'中',high:'高'},K=v=>v==='r'?'ランダム':NAMES[v];
+if(m=='i')return 'ルート'+K(c.ic.root)+'・音域'+RG[c.ic.reg];
+if(m=='c')return (c.rootFix===false?'ルートランダム':'ルートC固定')+'・音域'+RG[c.cd.reg]+'・'+['基本形','第1転回','第2転回','第3転回'][c.cd.inv]+'・'+(c.cd.vc=='open'?'オープン':'クローズ')+'・音色'+(c.cd.tb?'B':'A');
+if(m=='q')return '';return 'キー'+K(c.kc.key)+'・音域'+RG[c.kc.reg]}
+let ctx,master,nodes=[],loopT;
+function init(){if(ctx)return;ctx=new(window.AudioContext||window.webkitAudioContext)();const c=ctx.createDynamicsCompressor();master=ctx.createGain();master.gain.value=.6;master.connect(c);c.connect(ctx.destination)}
+function stopAll(){clearTimeout(loopT);clearTimeout(S.pt);S.playing=false;nodes.forEach(o=>{try{o.stop()}catch(e){}});nodes=[]}
+const REGSH={low:-10,mid:0,high:12},cdV=c=>c.cd||{reg:'mid',inv:0,vc:'close'},cdTb=c=>c.cd?c.cd.tb:0;
+function tone(m,t,d,v,tb){const f=440*Math.pow(2,(m-69)/12),o=ctx.createOscillator(),g=ctx.createGain(),fl=ctx.createBiquadFilter();
+o.type=tb?'triangle':'sawtooth';o.frequency.value=f;fl.type='lowpass';
+fl.frequency.setValueAtTime(tb?2500:Math.min(f*8,5000),t);fl.frequency.exponentialRampToValueAtTime(tb?900:Math.max(f*1.5,300),t+d);
+g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+o.connect(fl);fl.connect(g);g.connect(master);o.start(t);o.stop(t+d+.05);nodes.push(o)}
+function voice(pc,iv,k,tg){const rb=55+((pc-55)%12+12)%12;let a=iv.map(i=>rb+i).sort((x,y)=>x-y);
+for(let j=0;j<k;j++)a.push(a.shift()+12);
+if(tg!=null){const m=a.reduce((s,x)=>s+x,0)/a.length,sh=Math.round((tg-m)/12)*12;a=a.map(x=>x+sh)}
+return a.sort((x,y)=>x-y)}
+function best(pc,iv,tg){let b=null,bd=1e9;const T=.6*tg+.4*64;
+for(let k=0;k<iv.length;k++){const a=voice(pc,iv,k,null),m=a.reduce((s,x)=>s+x,0)/a.length;
+for(const s of[-12,0,12]){const d=Math.abs(m+s-T);if(d<bd){bd=d;b=a.map(x=>x+s)}}}return b}
+function chord(pc,iv,t,d,tb,inv,tg,o){o=o||{};let up,bass;if(o.v2){const v=o.v2,sh=REGSH[v.reg||'mid'],k=Math.min(v.inv||0,iv.length-1),p=(pc+iv[k])%12,lo=55+sh,L=lo+((p-lo)%12+12)%12,rot=iv.slice(k).concat(iv.slice(0,k).map(i=>i+12));up=rot.map(x=>L+x-rot[0]);if(v.vc=='open'&&up.length>2){up[up.length-2]-=12;up.sort((x,y)=>x-y)}const bl=43+sh;bass=bl+((p-bl)%12+12)%12}
+else{up=o.rb!=null?iv.map(i=>o.rb+i).sort((x,y)=>x-y):inv==null?best(pc,iv,tg):voice(pc,iv,inv,o.reg?REG[o.reg]:tg);if(o.vc=='open'&&up.length>2){up=up.slice();up[up.length-2]-=12;up.sort((x,y)=>x-y)}const bp=(pc+iv[o.bass||0])%12;bass=43+((bp-43)%12+12)%12}
+
+const hv=new Set([bass,...up].map(m=>m%12));chord.ck=iv.every(i=>hv.has((pc+i)%12))?1:0;chord.last=[bass,...up];tone(bass,t,d,.35*(o.vel||1)*(o.bv||1),tb);up.forEach((m,i)=>tone(m,t+i*.022,d,.2*(o.vel||1),tb));return up.reduce((s,x)=>s+x,0)/up.length}
+function cadence(k,t,sp,sh){let tg=64+(sh||0);[0,5,7,0].forEach((r,i)=>{tg=chord((k+r)%12,CH.maj.iv,t+i*.8*sp,(i==3?1.6:.85)*sp,0,null,tg)});return t+4*sp}
+const bm=x=>48+((x-48)%12+12)%12;
+const kcKey=()=>{const k=CC().kc;return k.key!='r'?k.key:R(12)},kcSh=()=>{const r=CC().kc.reg;return r=='low'?-12:r=='high'?12:r=='any'?[-12,0,12][R(3)]:0};
+const tab=()=>PL7(S.lv.p)?D7:DT;
+function play(auto){init();ctx.resume&&ctx.resume();stopAll();if(S.test&&!auto&&!S.cur.done&&(S.cur.pl||0)>=TPL){tsRender(S.cur);return}if(!auto&&!S.cur.done){S.cur.pl=(S.cur.pl||0)+1;if(!S.cur.t1)S.cur.t1=Date.now()}const c=S.cur,t=ctx.currentTime+.08,sp=S.slow?1.6:1;let end;
+if(S.m=='q'){const am=S.lv.q>=5;chord(c.pc,CH[c.type].iv,t,2.2,c.tb,c.inv,64,am?{bv:1.8}:null);if(!c.notes){c.notes=chord.last;c.ck=chord.ck;c.ctx=am?'bass':null}end=t+2.4}
+else if(S.m=='c')end=playC(c,t);else if(S.m=='i')end=playI(c,t);else if(S.m=='f'||S.m=='g')end=playF(c,t,sp);else if(S.m=='h')end=playH(c,t,sp);else if(S.m=='j')end=playJ(c,t,sp);else if(S.m=='k')end=playK(c,t,sp);else if(S.m=='m')end=playM(c,t,sp);else if(S.m=='n')end=playN(c,t+.1,sp);else if(S.m=='l')end=playL(c,t,sp);else if(S.m=='b'){const e=cadence(c.key,t,sp,c.sh)+.45*sp,nb=bm(c.key+c.deg)+(c.sh||0);tone(nb,e,1.8,.45,0);if(!c.notes)c.notes=[nb];end=e+1.9}
+else if(c.vl){const e=cadence(c.key,t,sp,c.sh)+.5*sp,fs=!c.notes;if(fs){c.notes=[];c.ck=1}c.seq.forEach((d,i)=>{const tt=e+i*1.25*sp;tone(c.bb[i],tt,1.15*sp,.55,0);c.vv[i].forEach(n=>tone(n,tt,1.15*sp,.3,0));if(fs)c.notes.push([c.bb[i],...c.vv[i]])});end=e+(c.seq.length*1.25+.4)*sp}
+else{let tg=64+(c.sh||0);const e=cadence(c.key,t,sp,c.sh)+.5*sp;const fs=!c.notes;if(fs){c.notes=[];c.ck=1}c.seq.forEach((d,i)=>{tg=chord((c.key+tab()[d][0])%12,CH[tab()[d][1]].iv,e+i*1.15*sp,1.1*sp,0,null,tg);if(fs){c.notes.push(chord.last);c.ck=Math.min(c.ck,chord.ck)}});end=e+(c.seq.length*1.15+.4)*sp}
+S.playing=true;S.pt=setTimeout(()=>{if(S.playing&&S.cur===c){S.playing=false;render()}},Math.max(200,(end-ctx.currentTime)*1000+150));$('#play').textContent='■ 止める';
+if(S.loop&&!c.done)loopT=setTimeout(()=>{if(S.loop&&!S.cur.done)play(1)},(end-ctx.currentTime)*1000+800)}
+function playOne(i){init();stopAll();if(S.m=='l'){tone(S.cur.mid[i],ctx.currentTime+.05,1.0,.45,0);return}const c=S.cur,d=tab()[c.seq[i]];if(c.vl){const tt=ctx.currentTime+.05;tone(c.bb[i],tt,1.6,.55,0);c.vv[i].forEach(n=>tone(n,tt,1.6,.3,0));return}chord((c.key+d[0])%12,CH[d[1]].iv,ctx.currentTime+.05,1.6,0,null,64+(c.sh||0))}
+function pick(items,pre){return pick2(items,pre)}
+function pick2(items,pre){const bk=pre+items.join(','),L=S.lp=S.lp||{},G=S.bag=S.bag||{},rq=S.retry||[],qn=S.qn||0;
+const ri=rq.findIndex(r=>r.due<=qn&&items.some(i=>pre+i==r.k));
+if(ri>=0){const k=rq.splice(ri,1)[0].k,it=items.find(i=>pre+i==k);L[bk]=it;return it}
+if(S.rev){const now=Date.now(),du=items.filter(i=>D.srs[pre+i]&&D.srs[pre+i].due<=now).sort((a,b)=>D.srs[pre+a].due-D.srs[pre+b].due);if(du.length){const it=du[0]===L[bk]&&du.length>1?du[1]:du[0];S.revHit=1;L[bk]=it;return it}}
+let b=G[bk];
+if(!b||!b.length){b=[];items.forEach(i=>{const m=D.miss[pre+i]||0,n=1+(m>=4?2:m>=2?1:0);for(let k=0;k<n;k++)b.push(i)});for(let i=b.length-1;i>0;i--){const j=R(i+1);[b[i],b[j]]=[b[j],b[i]]}G[bk]=b}
+let x=b.pop();if(x===L[bk]&&b.length){const y=b.pop();b.unshift(x);x=y}
+L[bk]=x;return x}
+const ak=()=>S.m=='c'?'c.'+CL[S.lv.c].id:S.m+S.lv[S.m];
+function promo(){const l=S.lv[S.m],L=D.log.filter(e=>e.m==S.m&&(S.m=='c'?e.lid==CL[l].id:e.lv==l)).slice(-20),st={},need=S.m=='q'?LV.q[l]:S.m=='b'||S.m=='i'||S.m=='l'||S.m=='f'||S.m=='g'||S.m=='h'||S.m=='j'||S.m=='k'||S.m=='m'||S.m=='n'?LV[S.m][l]:S.m=='p'?OP[l]:CL[l].ph=='cmp'?CL[l].pr.map(x=>x[0]+'|'+x[1]):LV.c[l];
+L.forEach(e=>{const ks=S.m=='p'||S.m=='l'?(e.c||[]):[S.m=='c'&&e.ph=='cmp'?e.pr:e.c];ks.forEach((k,j)=>{const s=st[k]=st[k]||{n:0,ok:0};s.n++;s.ok+=(S.m=='p'||S.m=='l')&&e.res?e.res[j]:e.ok})});
+const mn=S.m=='p'||S.m=='l'?1:need.length<=6?3:2,tot=L.length,acc=tot?L.reduce((s,e)=>s+e.ok,0)/tot:0,miss=need.filter(k=>!st[k]||st[k].n<mn),weak=need.filter(k=>st[k]&&st[k].n>=mn&&st[k].ok/st[k].n<.7);
+return{ok:tot>=Math.max(10,Math.min(20,need.length*mn))&&acc>=.85&&!miss.length&&!weak.length,acc,miss:miss.length,weak:weak.length,tot}}
+function cov(){const l=S.lv[S.m],seen=new Set();D.log.filter(e=>e.m==S.m&&e.lv==l).slice(-20).forEach(e=>{if(S.m=='p')(e.c||[]).forEach(d=>seen.add(d));else if(S.m=='c'&&e.ph=='cmp')seen.add(e.pr);else seen.add(e.c)});
+const need=S.m=='q'?LV.q[l]:S.m=='b'?LV.b[l]:S.m=='p'?OP[l]:CL[l].ph=='cmp'?CL[l].pr.map(x=>x[0]+'|'+x[1]):LV.c[l];return need.every(x=>seen.has(x))}
+function pickOld(items,pre){const w=items.map(i=>1+Math.min(6,D.miss[pre+i]||0));let r=Math.random()*w.reduce((a,b)=>a+b,0);
+for(let i=0;i<items.length;i++){r-=w[i];if(r<=0)return items[i]}return items[0]}
+function mkI(l){const its=LV.i[l],item=pick(its,'i:');let dir,sz;
+if(l==0){sz=item=='S'?0:1+R(9);dir=item=='S'?0:item=='U'?1:-1}else{sz=item;dir=l<=11?1:l<=14?-1:(R(2)?1:-1)}
+const ic=CC().ic,IB={low:45,mid:55,high:67};let m0;
+if(ic.root=='r')m0=ic.reg=='any'?52+R(20):IB[ic.reg]+R(12);else{const bs=ic.reg=='any'?[45,55,67][R(3)]:IB[ic.reg];m0=bs+((ic.root-bs)%12+12)%12}
+const m1=m0+dir*sz;return{m0,m1,item,dir,sz,pc:m0%12,notes:[m0,m1],fx:ic.root!='r'}}
+function ivName(c){return c.sz==0?'同音':(c.dir>0?'上行':'下行')+(S.lv.i==0?'（'+IVN[c.sz]+'）':'の'+IVN[c.sz])}
+function mkL(l){const cf=LLV[l],seq=[];for(let i=0;i<cf.n;i++){let x,g=0;do{x=pick(cf.pool,'l:')}while(i&&x==seq[i-1]&&g++<30);seq.push(x)}
+const key=kcKey(),sh=kcSh(),mid=[bm(key+seq[0])+sh];for(let i=1;i<seq.length;i++){let d=((seq[i]-seq[i-1])%12+12)%12;if(d>6)d-=12;let n=mid[i-1]+d;if(n<40+sh)n+=12;if(n>64+sh)n-=12;mid.push(n)}
+return{key,seq,ans:[],mid,notes:mid.slice(),sh}}
+const fnEff=()=>S.test?'roman':(S.fn||'roman'),cdName=(key,d)=>cn((key+DT[d][0])%12,DT[d][1]);
+function seqOf(x,l){return l==6?CAD2[x].seq:l==7?CAD3[x]:[x]}
+function labF(x,c){const l=S.lv.f,nm=fnEff()=='name';
+if(l<=4)return nm?cdName(c.key,x):DT[x][2];if(l==5)return FNL[x];
+const q=seqOf(x,l);return(nm?q.map(d=>cdName(c.key,d)).join('→'):q.map(d=>DT[d][2]).join('–'))+(l==6?'（'+CAD2[x].n+'）':'')}
+const hNear=(pc,prev,sh)=>{let n=pc+12*Math.round((prev-pc)/12);while(n<55+sh)n+=12;while(n>76+sh)n-=12;return n};
+function labH(x,c){const l=S.lv.h;if(l<=1)return IVN[x];if(l<=3)return QS[x];return fnEff()=='name'?PAT[x].map(([o,q])=>NAMES[(c.key+o)%12]+QS[q]).join('→'):PLH[x]}
+function mkH(l){const key=kcKey(),sh=kcSh(),item=pick(LV.h[l],'h:'),c={key,item,sh};if(l>=4)c.seq=PAT[item];
+c.prompt=['ルートの低い音のあとに、もう1音（コードの3rd）が鳴ります。ルートから見て、長3度ですか、短3度ですか？','ルートの低い音のあとに、もう1音（コードの7th）が鳴ります。ルートから見て、長7度ですか、短7度ですか？','低いルートの上に、3rdと7thの2音だけが鳴ります。コードの種類は？','ルート（単音）のあとに、3rdと7thの2音が鳴ります。コードの種類は？','低いルートと、ガイドトーン（3rdと7th）だけで進行が鳴ります。どの進行ですか？','低いルートと、ガイドトーン（3rdと7th）だけで進行が鳴ります。どの進行ですか？','低いルートと、ガイドトーン（3rdと7th）だけで4コードの進行が鳴ります。どの進行ですか？','ルートなし。ガイドトーン（3rdと7th）だけで4コードの進行が鳴ります。どの進行ですか？'][l];return c}
+function playH(c,t,sp){const l=S.lv.h,sh=c.sh||0,fs=!c.notes,N=[];let end;
+if(l<=1){const r=bm(c.key)+sh,n=hNear((c.key+c.item)%12,64+sh,sh);tone(r,t,2.6*sp,.45,0);tone(n,t+1.3*sp,1.5*sp,.5,0);N.push(r,n);end=t+3.1*sp}
+else if(l<=3){const r=bm(c.key)+sh,iv=HQ[c.item],a=hNear((c.key+iv[1])%12,62+sh,sh),b=hNear((c.key+iv[3])%12,66+sh,sh),d0=l==2?0:1.2;
+tone(r,t,(l==2?2.4:1.0)*sp,.45,0);tone(a,t+d0*sp,2.0*sp,.45,0);tone(b,t+d0*sp,2.0*sp,.45,0);N.push(r,a,b);end=t+(d0+2.5)*sp}
+else{let p3=62+sh,p7=67+sh;c.seq.forEach(([o,q],i)=>{const iv=HQ[q],a=hNear((c.key+o+iv[1])%12,p3,sh),b=hNear((c.key+o+iv[3])%12,p7,sh),tt=t+i*1.3*sp;p3=a;p7=b;
+if(l!=7){const r=bm(c.key+o)+sh;tone(r,tt,1.2*sp,.45,0);N.push(r)}tone(a,tt,1.2*sp,.45,0);tone(b,tt,1.2*sp,.45,0);N.push(a,b)});end=t+(c.seq.length*1.3+.5)*sp}
+if(fs){c.notes=N;c.ck=1}return end}
+function fullH(c,t){const l=S.lv.h,sh=c.sh||0;if(l<=1)return t+3;if(l<=3){chord(c.key,HQ[c.item],t,2.2,0,null,64+sh);return t+3}
+let tg=64+sh;c.seq.forEach(([o,q],i)=>{tg=chord((c.key+o)%12,HQ[q],t+i*1.3,1.2,0,null,tg)});return t+c.seq.length*1.3+.8}
+function labK(x,c){if(S.lv.k<=4)return KR[x];return fnEff()=='name'?PK[x].map(([o,q,b])=>kName(c.key+o,q,c.key+b)).join('→'):PKL[x]}
+function mkK(l){const key=kcKey(),sh=kcSh(),item=pick(LV.k[l],'k:'),c={key,item,sh};
+if(l<=4){c.q=l==2||l==4?['maj7','m7','d7'][R(3)]:['maj','min'][R(2)];c.bo=(key+KOFF(c.q,item))%12;c.prompt=l<=2?NAMES[key]+XS[c.q]+' の上で、ベースが鳴ります。ベースは、コードのどの音ですか？':'上のコードの下で、ベースが鳴ります。ベースは、コードのどの音ですか？'}
+else{c.seq=PK[item];c.prompt='キーを確認した後の'+c.seq.length+'つのコード（ベースが違うものがあります）。どの進行ですか？'}return c}
+function playK(c,t,sp){const sh=c.sh||0,fs=!c.notes;let end;const N=[];
+if(S.lv.k<=4){const up=voiceK([XQ[c.q].map(x=>(c.key+x)%12)],sh)[0],b=bassK(c.bo,sh);tone(b,t,2.6*sp,.55,0);up.forEach(n=>tone(n,t,2.6*sp,.3,0));N.push(b,...up);end=t+3*sp}
+else{const e=cadence(c.key,t,sp,sh)+.5*sp,ups=voiceK(c.seq.map(([o,q])=>XQ[q].map(x=>(c.key+o+x)%12)),sh);c.seq.forEach(([o,q,bo],i)=>{const tt=e+i*1.25*sp,b=bassK((c.key+bo)%12,sh);tone(b,tt,1.15*sp,.55,0);ups[i].forEach(n=>tone(n,tt,1.15*sp,.3,0));N.push(b,...ups[i])});end=e+(c.seq.length*1.25+.5)*sp}
+if(fs){c.notes=N;c.ck=1}return end}
+function labM(x,c){return TNL[x]}
+function mkM(l){const key=kcKey(),sh=kcSh(),item=pick(LV.m[l],'m:'),c={key,item,sh,q:QL[l]};
+c.prompt=l<5?NAMES[key]+QMS[c.q]+' に、テンションが乗っています。どのテンションですか？（一番上の音に注目）':'キーを確認した後の ii–V–I。V7に乗っているテンションは？';return c}
+function playM(c,t,sp){const sh=c.sh||0,fs=!c.notes,N=[];let end;
+if(S.lv.m<5){const v=voiceM(c.key,c.q,c.item,sh);v.forEach((n,i)=>tone(n,t,2.8*sp,i?.3:.55,0));N.push(...v);end=t+3.2*sp}
+else{const e=cadence(c.key,t,sp,sh)+.5*sp,ch=[[2,'min','none'],[7,'dom',c.item],[0,'maj','none']];ch.forEach(([o,q,tn],i)=>{const v=voiceM((c.key+o)%12,q,tn,sh),tt=e+i*1.4*sp;v.forEach((n,j)=>tone(n,tt,1.3*sp,j?.3:.55,0));N.push(...v)});end=e+4.5*sp}
+if(fs){c.notes=N;c.ck=1}return end}
+function labJ(x,c){return fnEff()=='name'?PJ[x].s.map(([o,q])=>NAMES[(c.key+o)%12]+XS[q]).join('→'):PJ[x].l}
+function mkJ(l){const key=kcKey(),sh=kcSh(),item=pick(LV.j[l],'j:'),P=PJ[item];return{key,item,seq:P.s,sh,mn:!!P.mn,prompt:(P.mn?'短調のキー':'メジャーキー')+'を確認した後の'+P.s.length+'つのコード。どの進行ですか？'}}
+function playJ(c,t,sp){const sh=c.sh||0;let tg=64+sh,e;
+if(c.mn){[[0,'min'],[5,'min'],[7,'d7'],[0,'min']].forEach(([r,q],i)=>{tg=chord((c.key+r)%12,XQ[q],t+i*.8*sp,(i==3?1.6:.85)*sp,0,null,tg)});e=t+4*sp}else e=cadence(c.key,t,sp,sh);
+e+=.5*sp;tg=64+sh;const fs=!c.notes;if(fs){c.notes=[];c.ck=1}
+c.seq.forEach(([o,q],i)=>{tg=chord((c.key+o)%12,XQ[q],e+i*1.25*sp,1.15*sp,0,null,tg);if(fs){c.notes.push(chord.last);c.ck=Math.min(c.ck,chord.ck)}});return e+(c.seq.length*1.25+.5)*sp}
+function labG(x,c){const q=gSeq(x);return fnEff()=='name'?q.map(d=>cdName(c.key,d)).join('→'):q.map(d=>DT[d][2]).join('–')}
+function mkG(l){const key=kcKey(),sh=kcSh(),item=pick(LV.g[l],'g:');return{key,item,seq:gSeq(item),sh,prompt:'キーを確認した後の'+gSeq(item).length+'つのコード。どの進行ですか？'}}
+function mkF(l){const key=kcKey(),sh=kcSh(),item=pick(LV.f[l],'f:');let seq;
+if(l<=4)seq=[item];else if(l==5)seq=[FN[item][R(FN[item].length)]];else seq=seqOf(item,l);
+const q=l<=4?'このコードは、主音から見てどの度数のコードですか？':l==5?'このコードの機能は？':l==6?'キーを確認した後の2つのコード。この進行の種類は？':'キーを確認した後の3つのコード。この進行は？';
+return{key,item,seq,prompt:q,sh}}
+function playF(c,t,sp){const e=cadence(c.key,t,sp,c.sh)+.5*sp,fs=!c.notes;let tg=64+(c.sh||0);if(fs){c.notes=[];c.ck=1}const du=c.seq.length==1?1.8:1.1;
+c.seq.forEach((d,i)=>{tg=chord((c.key+DT[d][0])%12,CH[DT[d][1]].iv,e+i*1.15*sp,du*sp,0,null,tg);if(fs){c.notes.push(chord.last);c.ck=Math.min(c.ck,chord.ck)}});return e+(c.seq.length*1.15+.7)*sp}
+function playI(c,t){tone(c.m0,t,1.0,.5,0);tone(c.m1,t+1.15,1.0,.5,0);return t+2.3}
+function playL(c,t,sp){const e=cadence(c.key,t,sp,c.sh)+.5*sp;c.mid.forEach((m,i)=>tone(m,e+i*.9*sp,.8*sp,.45,0));return e+(c.mid.length*.9+.4)*sp}
+function mkPV(c,l){const t=PL7(l)?D7:DT,sz=PL7(l)?4:3;c.vl=1;c.ivl=l>=10;c.bi=c.seq.map((d,i)=>{if(l<8||!i)return 0;const r=Math.random();return sz==3?(r<.5?0:r<.8?1:2):(r<.4?0:r<.7?1:r<.9?2:3)});
+const chs=c.seq.map(d=>CH[t[d][1]].iv.map(x=>(c.key+t[d][0]+x)%12));c.vv=voiceK(chs,c.sh||0);c.bb=chs.map((pcs,i)=>bassK(pcs[c.bi[i]],c.sh||0))}
+function newQ(){stopAll();S.qn=(S.qn||0)+1;S.revHit=0;const l=S.lv[S.m];let c;
+if(songMode()){S.cur={done:true,seq:[],ans:[],key:0,item:'',sr:[],si:0,sd:false,ok:0};render();return}
+if(S.m=='c')c=mkc2(l);else if(S.m=='i')c=mkI(l);else if(S.m=='f')c=mkF(l);else if(S.m=='g')c=mkG(l);else if(S.m=='h')c=mkH(l);else if(S.m=='j')c=mkJ(l);else if(S.m=='k')c=mkK(l);else if(S.m=='m')c=mkM(l);else if(S.m=='n')c=mkN(l);else if(S.m=='l')c=mkL(l);else if(S.m=='q'){const type=pick(LV.q[l],'q:');c={type,pc:R(12),inv:l==6?R(CH[type].iv.length):0,tb:l==6?R(2):0}}
+else if(S.m=='b'){c={key:kcKey(),deg:pick(LV.b[l],'b:'),sh:kcSh()}}
+else{let seq;if(l==0)seq=[0,[3,4][R(2)]];else if(l==1){seq=[0];for(let i=1;i<3;i++){let x;do{x=pick([0,3,4],'p:')}while(x==seq[i-1]);seq.push(x)}}else if(l==2)seq=[...CUR1[R(CUR1.length)]];else if(l==3)seq=[...CUR[R(CUR.length)]];else{seq=[];const pool=OP[l];
+for(let i=0;i<4;i++){let x;do{x=pick(pool,'p:')}while(i&&x==seq[i-1]);seq.push(x)}}
+c={key:kcKey(),seq,ans:[],sh:kcSh()};if(l>=6)mkPV(c,l)}
+c.done=false;c.rv=S.revHit;S.cur=c;render()}
+const INT={3:'♭3',4:'3',6:'♭5',7:'5',8:'♯5',9:'♭♭7',10:'♭7',11:'M7'},SUF={maj:'',min:'m',maj7:'maj7',m7:'m7',dom7:'7'},TH=[{th:'3rd',pairs:[['maj','min']],opts:['maj','min']},{th:'7th',pairs:[['maj','dom7'],['maj','maj7'],['min','m7']],opts:['maj','dom7','maj7','min','m7']}];
+const cn=(pc,t)=>NAMES[pc]+(t in SUF?SUF[t]:CH[t].n);
+const chg=(A,B)=>{const a=CH[A].iv.filter(i=>!CH[B].iv.includes(i)),b=CH[B].iv.filter(i=>!CH[A].iv.includes(i)),f=x=>x.map(i=>INT[i]).join('・');return a.length&&b.length?f(a)+' → '+f(b):b.length?f(b)+'が加わる':f(a)+'がなくなる'};
+function mkc(l){const T=TH[l>>1],ph=l%2?'solo':'cmp',fx=S.rootFix!==false;
+if(ph=='cmp'){const pi=pick(T.pairs.map((_,i)=>i),'cp:'+T.th+':'),pr=T.pairs[pi],o=R(2),A=pr[o],B=pr[1-o],tg=pr[R(2)],pc=R(12);
+return{ph,th:T.th,pc,A,B,pair:pr.join('|'),cor:A==tg?0:1,nc:2,bk:'cp:'+T.th+':'+pi,fx:false,prompt:'2つのコードが同じルートで順に鳴ります。どちらが「'+CH[tg].n+'」？',exp:'答えは'+(A==tg?'1つ目':'2つ目')+'。1つ目 '+cn(pc,A)+'、2つ目 '+cn(pc,B)+'（1つ目→2つ目：'+chg(A,B)+'）'}}
+const type=pick(T.opts,'cs:'),pc=fx?0:R(12);
+return{ph,th:T.th,pc,type,cor:type,nc:T.opts.length,bk:'cs:'+type,fx,prompt:'コードが1つ鳴ります。種類は？'+(fx?'（ルートはC固定）':''),exp:cn(pc,type)}}
+function playC(c,t){const seq=c.ph=='cmp'?[c.A,c.B]:[c.type],fs=!c.notes,am=c.am,g=0;if(fs){c.notes=[];c.ck=1}
+seq.forEach((ty,i)=>{const iv=CH[ty].iv;chord(c.pc,iv,t+g+i*2.4,2.0,cdTb(c),0,64,{bv:am?1.8:1,v2:cdV(c),vel:Math.sqrt(3/iv.length)});if(fs){c.notes.push(chord.last);c.ck=Math.min(c.ck,chord.ck)}});return t+g+seq.length*2.4}
+function playDiff(){const c=S.cur;if(S.m!='c'||c.ph!='cmp')return;init();ctx.resume&&ctx.resume();stopAll();const t=ctx.currentTime+.08,r=bm(c.pc),A=CH[c.A].iv,B=CH[c.B].iv;[[0],A.filter(i=>!B.includes(i)),B.filter(i=>!A.includes(i))].forEach((ns,k)=>ns.forEach(i=>tone(r+i,t+k*1.3,1.1,.45,0)))}
+const TSK={'3rd':['3rd'],'7th':['7th'],'7thk':['7th','3rd'],'5th':['5th'],mix:[]};
+function effCd(ts){const b=CC().cd,amb=ts.some(t=>AMB[t]),mx=Math.min(...ts.map(t=>CH[t].iv.length-1));return{reg:b.reg==='rand'?['low','mid','high'][R(3)]:b.reg,vc:b.vc==='rand'?(R(2)?'open':'close'):b.vc,tb:b.tb==='rand'?R(2):b.tb,inv:amb?0:b.inv==='rand'?R(mx+1):Math.min(b.inv,mx)}}
+function mkc2(l){const c=mkc2a(l);c.cd=effCd(c.ph=='cmp'?[c.A,c.B]:[c.type]);if(c.cd.inv>0)c.prompt='【第'+c.cd.inv+'転回形・ルートは'+NAMES[c.pc]+'】'+c.prompt;return c}
+function mkc2a(l){const T=CL[l],fx=CC().rootFix!==false;
+if(T.ph=='cmp'){const pi=pick(T.pr.map((_,i)=>i),'cp:'+T.id+':'),[a,b,tg,q,el]=T.pr[pi],o=R(2),A=o?b:a,B=o?a:b,pc=fx?0:R(12);
+return{ph:'cmp',th:T.th,pc,A,B,pair:a+'|'+b,am:!!(AMB[a]||AMB[b]),cor:A==tg?0:1,nc:2,bk:'cp:'+T.id+':'+pi,fx,el:[el],prompt:'2つのコードが同じルートで順に鳴ります。'+(fx?'（ルートはC固定）':'')+q,exp:'答えは'+(A==tg?'1つ目':'2つ目')+'。1つ目 '+cn(pc,A)+'、2つ目 '+cn(pc,B)+'（1つ目→2つ目：'+chg(A,B)+'）'}}
+const type=pick(T.opts,'cs:'),pc=fx?0:R(12);
+return{ph:'solo',th:T.th,pc,type,am:T.opts.some(t=>AMB[t]),cor:type,nc:T.opts.length,bk:'cs:'+type,fx,el:(T.th=='mix'?['emx']:[]).concat(ELT[type]),prompt:'コードが1つ鳴ります。種類は？'+(fx?'（ルートはC固定）':'')+(T.opts.some(t=>AMB[t])?'（低音のルートを強めに鳴らします）':''),exp:cn(pc,type)}}
+function one(i){const c=S.cur;if(S.m=='n'){init();ctx.resume&&ctx.resume();stopAll();playN(c,ctx.currentTime+.08,S.slow?1.6:1,i);return}if(S.m!='c'||c.ph!='cmp')return;init();ctx.resume&&ctx.resume();stopAll();if(!c.done)c.pab=(c.pab||0)+1;const ty=i?c.B:c.A,iv=CH[ty].iv,t=ctx.currentTime+.08,g=0;chord(c.pc,iv,t+g,2.0,cdTb(c),0,64,{bv:c.am?1.8:1,v2:cdV(c),vel:Math.sqrt(3/iv.length)})}
+function qspec(c){const n=c.notes,f=Array.isArray(n)&&Array.isArray(n[0])?n.flat():(n||[]),mn=f.length?f.reduce((s,x)=>s+x,0)/f.length:null,reg=mn==null?null:mn<58?'low':mn<70?'mid':'high';
+if(S.m=='c')return{tid:CL[S.lv.c].id,k:c.ph=='cmp'?'cmp:'+c.pair:'solo:'+c.type,th:c.th,ph:c.ph,pair:c.pair||null,cond:c.cd?{reg:c.cd.reg,vc:c.cd.vc,bass:c.cd.inv,root:c.fx?'fixed':'rand',tb:c.cd.tb}:{reg,vc:'close',bass:0,root:c.fx?'fixed':'rand',tb:0},ctx:c.ph=='cmp'?'pair':null,el:c.el,sk:[...TSK[c.th],...(c.ph=='solo'?['solo']:[])]};
+if(S.m=='q')return{tid:'q.L'+(S.lv.q+1),k:'q:'+c.type,th:'free',ph:'solo',cond:{reg,vc:'close',bass:0,root:'rand',tb:c.tb},ctx:c.ctx||null,sk:['solo',...SKQ[c.type],...(S.lv.q==6?['cond']:[])]};
+if(S.m=='i')return{tid:'i.L'+(S.lv.i+1),k:'i:'+c.item,th:'free',ph:'solo',cond:{reg,vc:null,bass:null,root:c.fx?'fixed':'rand',tb:0},ctx:null,sk:[]};
+if(S.m=='n')return{tid:'n.L'+(S.lv.n+1),k:'n:'+c.item,th:'free',ph:'prog',cond:{reg,vc:'close',bass:S.lv.n>=3?1:0,root:'rand',tb:0},ctx:null,sk:['song']};
+if(S.m=='m')return{tid:'m.L'+(S.lv.m+1),k:'m:'+c.item,th:'free',ph:'solo',cond:{reg,vc:'close',bass:0,root:'rand',tb:0},ctx:S.lv.m>=5?'cadence':null,sk:['tension']};
+if(S.m=='k')return{tid:'k.L'+(S.lv.k+1),k:'k:'+c.item,th:'free',ph:'solo',cond:{reg,vc:'close',bass:S.lv.k<=4?(c.item=='r'?0:1):1,root:'rand',tb:0},ctx:S.lv.k>=5?'cadence':null,sk:S.lv.k<=4?[]:['prog']};
+if(S.m=='j')return{tid:'j.L'+(S.lv.j+1),k:'j:'+c.item,th:'free',ph:'prog',cond:{reg,vc:'close',bass:0,root:'rand',tb:0},ctx:'cadence',sk:['prog']};
+if(S.m=='h')return{tid:'h.L'+(S.lv.h+1),k:'h:'+c.item,th:'free',ph:'solo',cond:{reg,vc:null,bass:null,root:'rand',tb:0},ctx:S.lv.h>=4?'guide':null,sk:S.lv.h>=2?['3rd','7th']:[S.lv.h==0?'3rd':'7th']};
+if(S.m=='g')return{tid:'g.L'+(S.lv.g+1),k:'g:'+c.item,th:'free',ph:'prog',cond:{reg,vc:'close',bass:0,root:'rand',tb:0},ctx:'cadence',sk:['prog']};
+if(S.m=='f')return{tid:'f.L'+(S.lv.f+1),k:'f:'+c.item,th:'free',ph:'solo',cond:{reg,vc:'close',bass:0,root:'rand',tb:0},ctx:'cadence',sk:['prog']};
+if(S.m=='l')return{tid:'l.L'+(S.lv.l+1),k:'ll:'+c.seq.join('-'),th:'free',ph:'prog',cond:{reg,vc:null,bass:null,root:'rand',tb:0},ctx:'cadence',sk:[]};
+if(S.m=='b')return{tid:'b.L'+(S.lv.b+1),k:'b:'+c.deg,th:'free',ph:'solo',cond:{reg,vc:null,bass:null,root:'rand',tb:0},ctx:'cadence',sk:[]};
+return{tid:'p.L'+(S.lv.p+1),k:'pp:'+c.seq.join('-'),th:'free',ph:'prog',cond:{reg,vc:'close',bass:c.bi&&c.bi.some(x=>x>0)?1:0,root:'rand',tb:0},ctx:'cadence',sk:['prog']}}
+function cs(g,k,ok,nv,ts){const x=D[g][k]=D[g][k]||{n:0,ok:0,nn:0,nok:0,last:0,r:[]};x.n++;if(ok)x.ok++;if(nv){x.nn++;if(ok)x.nok++}x.last=ts;x.r=(x.r||[]).concat(ok?1:0).slice(-20)}
+function qid(c){if(S.m=='c')return['c',c.ph,c.A||c.type,c.B||'',c.pc].join('|')+(c.cd&&(c.cd.reg!='mid'||c.cd.inv||c.cd.vc!='close'||c.cd.tb)?'|'+[c.cd.reg,c.cd.inv,c.cd.vc,c.cd.tb].join(''):'');return S.m=='n'?['n',c.key,c.item].join('|'):S.m=='m'?['m',c.key,c.item].join('|'):S.m=='k'?['k',c.key,c.item,c.q||''].join('|'):S.m=='j'?['j',c.key,c.item].join('|'):S.m=='h'?['h',c.key,c.item].join('|'):S.m=='g'?['g',c.key,c.item].join('|'):S.m=='f'?['f',c.key,c.item,c.seq.join('-')].join('|'):S.m=='i'?['i',c.m0,c.item,c.dir].join('|'):S.m=='l'?['l',c.key,c.seq.join('-')].join('|'):S.m=='q'?['q',c.type,c.pc,c.inv,c.tb].join('|'):S.m=='b'?['b',c.key,c.deg].join('|'):['p',PL7(S.lv.p)?7:3,c.key,c.seq.join('-')].join('|')}
+function itm(k,ok,ts){const x=D.it[k]=D.it[k]||{n:0,ok:0,last:0,lastOk:0};x.n++;if(ok){x.ok++;x.lastOk=ts}x.last=ts}
+function rec(c,a,cr,ok,n,res){if(S.test)S.test.qs.push({ok:ok?1:0,lbl:tsLbl(c)});if(S.les&&S.les.qs)S.les.qs.push({b:S.les.bi,ok:ok?1:0,nolog:!!S.nolog});if(S.nolog)return;const ts=Date.now(),l=S.lv[S.m],ab=S.m=='c'?(c.ph=='cmp'?'quality_cmp':'quality_solo'):ABM[S.m],id=qid(c),nv=D.seen[id]?0:1;
+D.seen[id]=(D.seen[id]||0)+1;
+const sp=qspec(c),id2=[sp.k,sp.cond.reg,sp.cond.vc,sp.cond.bass,sp.cond.tb].join('|'),nv2=D.seen2[id2]?0:1;D.seen2[id2]=(D.seen2[id2]||0)+1;S.seq=(S.seq||0)+1;
+const e={sess:S.sess,sq:S.seq,pv:S.prev||null,gap:c.t1&&S.lastAns?c.t1-S.lastAns:null,tid:sp.tid,ls:S.les?S.les.id:undefined,cf:S.test?S.test.kind:undefined,th:sp.th,ph:sp.ph,pr:sp.pair||null,cond:sp.cond,ctx:sp.ctx,nt:c.notes||null,ck:c.ck==null?null:c.ck,nv2,t:ts,m:S.m,lv:l,ab,id,nc:S.m=='c'?c.nc:S.m=='q'?LV.q[l].length:S.m=='b'||S.m=='i'||S.m=='l'||S.m=='f'||S.m=='g'||S.m=='h'||S.m=='j'||S.m=='k'||S.m=='m'||S.m=='n'?LV[S.m][l].length:OP[l].length,c:cr,a,ok:ok?1:0,pl:c.pl||0,pab:c.pab||0,lid:S.m=='c'?CL[l].id:null,cdv:c.cd?1:0,el:sp.el||null,h:c.hint||0,md:S.md||'practice',src:S.src||'free',nv,ms:c.t1?ts-c.t1:null};
+if(S.m!='c'&&S.m!='i'&&S.m!='q'&&c.key!=null)e.kk=[c.key,c.sh||0];if(S.les&&!S.appc&&!S.test&&dpOn(S.m))e.dp=D.cdep[dpKey(S.m)];if(S.m=='p'||S.m=='l'){e.len=cr.length;e.n=n;e.res=res}if(S.m=='n'&&c.seq)e.sg=nSig(c.seq);if(S.m=='n'&&c.sr){e.st=c.sr.map(x=>[x.s,x.ok,x.n,x.len]);if(c.bl)e.bl=1}if(c.mel)e.mel=c.mel;if(c.ivl){e.ci=c.bi.slice();e.ai=(c.ainv||[]).slice()}
+D.log.push(e);if(D.log.length>3000)D.log.splice(0,D.log.length-3000);
+const A=D.abil[ab];A.n++;if(ok)A.ok++;if(nv){A.nn++;if(ok)A.nok++}A.last=ts;A.r=(A.r||[]).concat(ok?1:0).slice(-20);
+if(S.m=='p'||S.m=='l'){cr.forEach((d,j)=>itm(S.m+':'+d,res[j],ts));itm((S.m=='p'?'pp:':'ll:')+cr.join('-'),ok,ts)}else itm(S.m=='c'?sp.k:S.m+':'+cr,ok,ts);
+sp.sk.forEach(k=>cs('skill',k,ok,nv2,ts));(sp.el||[]).forEach(x=>cs('el',x+'.'+sp.ph,ok,nv2,ts));Object.entries(sp.cond).forEach(([k,v])=>{if(v!=null){cs('cnd',k+':'+v,ok,nv2,ts);cs('cnd',sp.th+'.'+sp.ph+'.'+k+':'+v,ok,nv2,ts)}});if(!ok&&S.m!='p'&&S.m!='l'){const ck=S.m=='c'&&c.ph=='cmp'?sp.k:S.m+':'+cr;D.conf[ck+'>'+a]=(D.conf[ck+'>'+a]||0)+1}S.prev=[sp.k,ok?1:0,c.pc!=null?c.pc:c.key];S.lastAns=ts;
+save()}
+function validate(o){if(!o||typeof o!='object'||Array.isArray(o))return'形式が正しくありません';
+if(o.app!='ear-training')return'このアプリのバックアップではありません';
+if(!Number.isInteger(o.schema)||o.schema<2)return'バージョン情報がありません';
+if(o.schema>SCHEMA)return'新しい形式のバックアップです（アプリの更新が必要です）';
+const d=o.data;if(!d||typeof d!='object'||Array.isArray(d))return'データ本体がありません';
+for(const k of['acc','miss','lv','seen','it','abil','skill','cnd','seen2','conf','el','set','pass2'])if(d[k]!=null&&(typeof d[k]!='object'||Array.isArray(d[k])))return k+' の形式が不正です';
+if(d.log!=null&&!Array.isArray(d.log))return'学習ログの形式が不正です';
+if((d.log||[]).some(e=>!e||typeof e.t!='number'||!['q','b','p','c','i','l','f','g','h','j','k','m','n'].includes(e.m)))return'学習ログに不正な項目があります';
+return null}
+function lsHist(){const L=D.les.slice(-8).reverse();return`<div class="h3">レッスン履歴</div>`+(L.length?`<table class="st"><tr><th>日時</th><th>種類</th><th>問数</th><th>正答率</th></tr>${L.map(x=>{const d=new Date(x.t);return`<tr><td>${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}</td><td>${LMODES[x.min]}</td><td>${x.n}</td><td>${Math.round(x.ok/Math.max(1,x.n)*100)}%</td></tr>`}).join('')}</table>`:'<p class="muted" style="margin:4px 0">まだレッスンの記録がありません。</p>')}
+function srsUI(){const ks=Object.keys(D.srs),du=srsDue(),bx=[0,0,0,0,0,0],G={};ks.forEach(k=>{bx[D.srs[k].b]++});du.forEach(k=>{const g=/^(q|b|p|i|l|f|g|h|j|k|m|n|cs|cp):/.exec(k);const n=g?{q:'和音の質(旧)',b:'ベース度数',p:'進行',i:'音程',l:'ベースライン',f:'コード機能',g:'進行パターン',h:'ガイドトーン',j:'発展進行',k:'分数コード',m:'テンション',n:'実曲採譜',cs:'Lv2 単独',cp:'Lv2 比較'}[g[1]]:'その他';G[n]=(G[n]||0)+1});
+return`<div class="h3">復習キュー（間隔反復）</div><p style="margin:4px 0">管理中 ${ks.length}項目／今すぐ復習 <b>${du.length}</b>項目${du.length?'（'+Object.keys(G).map(n=>n+' '+G[n]).join('・')+'）':''}</p><p class="muted" style="margin:4px 0">段階別：${bx.map((n,i)=>['新規ミス','1日','3日','7日','14日','30日'][i]+' '+n).join('／')}。間違えると10分後に復習対象へ戻り、期限が来た項目を正解するたびに間隔が1日→3日→7日→14日→30日と延びます。画面上部の「復習優先」をONにすると、期限が来た項目から優先して出題します。</p>`}
+function dsum(){revBtn&&revBtn();$('#dsum').textContent='形式 v'+D.schema+'／ログ '+D.log.length+'件（初見 '+D.log.filter(e=>e.nv).length+'件）／'+(ABIL.filter(k=>D.abil[k].n).map(k=>ABN[k]+' '+D.abil[k].ok+'/'+D.abil[k].n).join('、')||'能力別の記録なし')+(SK.some(k=>D.skill[k].n)?'／スキル: '+SK.filter(k=>D.skill[k].n).map(k=>SKN[k]+' '+D.skill[k].ok+'/'+D.skill[k].n).join('、'):'')}
+const SRI=[10*60e3,864e5,3*864e5,7*864e5,14*864e5,30*864e5];
+function srsUpd(k,ok){const now=Date.now(),x=D.srs[k];if(!ok){D.srs[k]={b:0,due:now+SRI[0]};return}if(!x){D.srs[k]={b:1,due:now+SRI[1]};return}if(x.due<=now){x.b=Math.min(x.b+1,5);x.due=now+SRI[x.b]}}
+function srsDue(){const now=Date.now();return Object.keys(D.srs).filter(k=>D.srs[k].due<=now)}
+function bump(k,ok){if(!ok){(S.retry=S.retry||[]).push({k,due:(S.qn||0)+3});if(S.retry.length>20)S.retry.shift()}if(S.nolog)return;srsUpd(k,ok);D.miss[k]=ok?Math.max(0,(D.miss[k]||0)-1):(D.miss[k]||0)+2}
+function logAcc(ok){if(S.nolog)return;const k=ak();D.acc[k]=(D.acc[k]||[]).concat(ok?1:0).slice(-20);save()}
+function demo(x){init();ctx.resume&&ctx.resume();stopAll();chord(R(12),CH[x].iv,ctx.currentTime+.05,2.2,0,0,64)}
+function resolve(c,t){const SC=[0,2,4,5,7,9,11],d=c.deg,m0=bm(c.key+d),dir=d<=6?-1:1,tg=dir<0?0:12;let cur=d;const p=[d];while(cur!=tg){do{cur+=dir}while(cur!=tg&&!SC.includes(cur%12));p.push(cur)}if(p.length>1)p.forEach((q,i)=>tone(m0+q-d,t+i*.55,.9,.4,0))}
+function answer(x){const c=S.cur;if(c.done)return;init();
+if(S.m=='c'){c.ok=x==c.cor;c.pick=x;bump(c.bk,c.ok);logAcc(c.ok);rec(c,x,c.cor,c.ok);c.done=true;stopAll()}
+else if(S.m=='q'){c.ok=x==c.type;c.pick=x;bump('q:'+c.type,c.ok);logAcc(c.ok);rec(c,x,c.type,c.ok);c.done=true;stopAll();const t=ctx.currentTime+.05;
+chord(c.pc,CH[c.type].iv,t,2.2,c.tb,c.inv,64);if(!c.ok)chord(c.pc,CH[x].iv,t+2.6,2.2,c.tb,c.inv,64)}
+else if(S.m=='m'){c.ok=x==c.item;c.pick=x;bump('m:'+c.item,c.ok);logAcc(c.ok);rec(c,x,c.item,c.ok);c.done=true;stopAll();const t=ctx.currentTime+.05,sh=c.sh||0;
+if(S.lv.m<5){const pv=(tn,o)=>voiceM(c.key,c.q,tn,sh).forEach((n,i)=>tone(n,t+o,2.2,i?.3:.55,0));pv(c.item,0);if(!c.ok)pv(x,2.8)}
+else{const pl=(tn,o)=>[[2,'min','none'],[7,'dom',tn],[0,'maj','none']].forEach(([r,q,z],i)=>voiceM((c.key+r)%12,q,z,sh).forEach((n,j)=>tone(n,t+o+i*1.4,1.3,j?.3:.55,0)));pl(c.item,0);if(!c.ok)pl(x,5)}}
+else if(S.m=='k'){c.ok=x==c.item;c.pick=x;bump('k:'+c.item,c.ok);logAcc(c.ok);rec(c,x,c.item,c.ok);c.done=true;stopAll();const t=ctx.currentTime+.05,l=S.lv.k;
+if(l<=4){tone(c.bo>=0?bassK(c.bo,c.sh||0):48,t,1.2,.55,0);const up=voiceK([XQ[c.q].map(y=>(c.key+y)%12)],c.sh||0)[0],b=bassK(c.bo,c.sh||0);tone(b,t+1.6,2.2,.55,0);up.forEach(n=>tone(n,t+1.6,2.2,.3,0))}
+else{const pl=(q,o)=>{const ups=voiceK(q.map(([r,qq])=>XQ[qq].map(y=>(c.key+r+y)%12)),c.sh||0);q.forEach(([r,qq,bo],i)=>{const tt=t+o+i*1.25;tone(bassK((c.key+bo)%12,c.sh||0),tt,1.15,.55,0);ups[i].forEach(n=>tone(n,tt,1.15,.3,0))})};pl(c.seq,0);if(!c.ok)pl(PK[x],c.seq.length*1.25+1)}}
+else if(S.m=='j'){c.ok=x==c.item;c.pick=x;bump('j:'+c.item,c.ok);logAcc(c.ok);rec(c,x,c.item,c.ok);c.done=true;stopAll();
+const t=ctx.currentTime+.05,pl=(q,o)=>{let tg=64+(c.sh||0);q.forEach(([r,qq],i)=>{tg=chord((c.key+r)%12,XQ[qq],t+o+i*1.25,1.15,0,null,tg)})};pl(c.seq,0);if(!c.ok)pl(PJ[x].s,c.seq.length*1.25+1)}
+else if(S.m=='h'){c.ok=x==c.item;c.pick=x;bump('h:'+c.item,c.ok);logAcc(c.ok);rec(c,x,c.item,c.ok);c.done=true;stopAll();const t=ctx.currentTime+.05,l=S.lv.h;
+if(l<=1)playH(c,t,1);else{const e=fullH(c,t);playH(c,e,1);if(l>=4&&!c.ok){const c2={key:c.key,item:x,sh:c.sh,seq:PAT[x],notes:[1]};playH(c2,e+c.seq.length*1.3+.8,1)}}}
+else if(S.m=='g'){c.ok=x==c.item;c.pick=x;bump('g:'+c.item,c.ok);logAcc(c.ok);rec(c,x,c.item,c.ok);c.done=true;stopAll();
+const t=ctx.currentTime+.05,pl=q=>{let tg=64+(c.sh||0);return q.map((d,i)=>{tg=chord((c.key+DT[d][0])%12,CH[DT[d][1]].iv,t+(pl.o||0)+i*1.15,1.1,0,null,tg)})};pl.o=0;pl(c.seq);if(!c.ok){pl.o=c.seq.length*1.15+1;pl(gSeq(x))}}
+else if(S.m=='f'){c.ok=x==c.item;c.pick=x;bump('f:'+c.item,c.ok);logAcc(c.ok);rec(c,x,c.item,c.ok);c.done=true;stopAll();
+if(S.lv.f<=4){const t=ctx.currentTime+.05,d=c.seq[0];chord((c.key+DT[d][0])%12,CH[DT[d][1]].iv,t,1.8,0,null,64+(c.sh||0));if(!c.ok&&typeof x=='number')chord((c.key+DT[x][0])%12,CH[DT[x][1]].iv,t+2.4,1.8,0,null,64+(c.sh||0))}}
+else if(S.m=='i'){c.ok=x==c.item;c.pick=x;bump('i:'+c.item,c.ok);logAcc(c.ok);rec(c,x,c.item,c.ok);c.done=true;stopAll();const t=ctx.currentTime+.05;playI(c,t);if(!c.ok&&typeof x=='number'){tone(c.m0,t+3,1.0,.5,0);tone(c.m0+(c.dir||1)*x,t+4.15,1.0,.5,0)}}
+else{c.ok=x==c.deg;c.pick=x;bump('b:'+c.deg,c.ok);logAcc(c.ok);rec(c,x,c.deg,c.ok);c.done=true;stopAll();const t=ctx.currentTime+.05;
+tone(bm(c.key+c.deg)+(c.sh||0),t,1.6,.45,0);if(!c.ok)tone(bm(c.key+x)+(c.sh||0),t+2,1.6,.45,0);resolve(c,t+(c.ok?1.9:3.9))}
+render()}
+function tap(i){const c=S.cur;if(c.done||c.ans.length>=c.seq.length)return;
+if(c.ivl){if(c.pend==null){if(i>=100)return;c.pend=i;render();return}if(i<100)return;c.ans.push(c.pend*10+(i-100));c.pend=null}else c.ans.push(i);
+if(c.ans.length==c.seq.length){let n=0;const res=[];if(c.ivl){c.ainv=c.ans.map(x=>x%10)}c.seq.forEach((d,j)=>{const ok=c.ivl?(c.ans[j]==d*10+c.bi[j]):d==c.ans[j];res.push(ok?1:0);if(ok)n++;bump(S.m+':'+d,ok);logAcc(ok)});c.n=n;c.ok=n==c.seq.length;c.done=true;rec(c,c.ivl?c.ans.map(x=>Math.floor(x/10)):[...c.ans],[...c.seq],c.ok,n,res)}
+render()}
+function render(){const c=S.cur,l=S.lv[S.m],m=M[S.m];
+$('#modes').innerHTML=MO.map(k=>`<button class="${k==S.m?'on':''}" data-m="${k}">${M[k].n}</button>`).join('');
+const LB=i=>{const pp=S.m!='q'&&D.pass[lvKey(S.m,i)];return`<button class="${i==l?'on':''}" data-l="${i}">Lv${i+1}${pp?(pp.lapsed?'△':'✓'):''}${S.m!='q'&&D.pass2[lvKey(S.m,i)]?'★':''}</button>`},LGRP=[['3rd',0,2],['7thの有無',2,4],['7thコード',4,8],['5th系',8,14],['総合',14,18]];
+$('#levels').className=S.m=='c'?'g':'seg';
+$('#levels').innerHTML=S.m=='c'?LGRP.map(([nm,a,b])=>`<div class="lg"><span class="lgl">${nm}</span><div class="lgb">${m.d.slice(a,b).map((_,k)=>LB(a+k)).join('')}</div></div>`).join(''):m.d.map((_,i)=>LB(i)).join('');
+$('#desc').textContent=m.d[l];
+const a=D.acc[ak()]||[],n=a.length,p=n?Math.round(a.reduce((x,y)=>x+y,0)/n*100):0,r=a.slice(-10);
+let s=n?`直近${n}問の正答率 ${p}%`:'まだ記録がありません';
+{const P=promo();if(l<m.d.length-1&&P.tot>=10)s+=P.ok?' — 昇格の目安を満たしています（直近'+P.tot+'問・正答率'+Math.round(P.acc*100)+'%・全種類を十分に出題）':P.acc>=.85?' — 正答率は高めですが、'+(P.miss?'出題数が足りない種類があります':'正答率70%未満の種類があります'):''}if(0)s+=cov()?' — 正答率が高いので次のレベルに進めます':' — 正答率は高めですが、まだ出題されていない種類があります';
+$('#stat').textContent=(c.rv?'【復習問題】 ':'')+(S.nolog?'【記録OFF：この回答は保存されません】 ':'')+s;dsum();$('#prompt').textContent=S.m=='n'?(songMode()?'':nPrompt(c)):S.m=='c'?c.prompt:(S.m=='f'||S.m=='g'||S.m=='h'||S.m=='j'||S.m=='k'||S.m=='m')?c.prompt+(fnEff()=='name'&&S.m!='h'&&S.m!='m'&&!(S.m=='k'&&S.lv.k<=4)?'（キーは'+NAMES[c.key]+'メジャー）':''):S.study&&S.m=='q'?'お手本モード：ボタンを押すとそのコードが鳴ります（ルートは毎回ランダム）。特徴を聴き比べてから、お手本をOFFにして出題に戻りましょう。':m.h;
+$('#slots').hidden=S.m!='p'&&S.m!='l'&&S.m!='n';$('#ref').hidden=S.m=='m'||S.m=='q'||S.m=='c'||S.m=='i';$('#diff').hidden=!((S.m=='c'&&c.ph=='cmp')||(S.m=='n'&&c.mel));$('#diff').textContent=S.m=='n'?'メロディなしで聴く':'変化する音';$('#rfix').hidden=S.m!='c'||!!(S.les&&(S.appc||dpOn('c')));$('#rfix').textContent='ルート: '+(S.rootFix===false?'ランダム':'固定');$('#pa').hidden=$('#pb').hidden=!((S.m=='c'&&c.ph=='cmp')||S.m=='n');$('#pa').textContent=S.m=='n'?'ベースだけ':'1つ目だけ';$('#pb').textContent=S.m=='n'?'上声だけ':'2つ目だけ';$('#play').textContent=S.m=='c'&&c.done?(c.ph=='cmp'?'▶ もう一度比較':'▶ もう一度聴く'):'▶ 聴く';$('#study').hidden=S.m!='q';const st=S.study&&S.m=='q';$('#slow').hidden=S.m=='q'||S.m=='c'||S.m=='i';$('#loop').hidden=st;$('#play').hidden=st;if(S.m=='p'||S.m=='l')$('#slots').style.gridTemplateColumns='repeat('+c.seq.length+',1fr)';
+let o='';
+if(S.m=='n'){o=songMode()?'':nRender(c)}else if(S.m=='p'||S.m=='l'){const t=S.m=='p'?tab():null,LBL=v=>S.m=='p'?(fnEff()=='name'?cn((c.key+t[v][0])%12,t[v][1]):t[v][2]):DEG[v];
+const iv=S.m=='p'&&c.ivl,IVN2=['原位置','第1転回','第2転回','第3転回'],sq=iv?c.seq.map((d,i)=>d*10+c.bi[i]):c.seq,LBL2=v=>iv?LBL(Math.floor(v/10))+(v%10?'<small>'+IVN2[v%10]+'</small>':''):LBL(v);
+$('#slots').innerHTML=c.seq.map((_,i)=>{const v=c.ans[i],cl=c.done?(c.ans[i]==sq[i]?'ok':'ng'):'',pd=iv&&!c.done&&i==c.ans.length&&c.pend!=null;
+return `<div class="slot ${cl}" ${c.done?`data-s="${i}" role="button" tabindex="0"`:''}>${pd?LBL(c.pend)+'<small>転回は？</small>':v==null?'・':LBL2(v)}${c.done&&c.ans[i]!=sq[i]?`<small>正解 ${LBL2(sq[i])}</small>`:''}</div>`}).join('');
+if(iv&&!c.done&&c.pend!=null){for(let k=0;k<(PL7(l)?4:3);k++)o+=`<button data-o="${100+k}">${IVN2[k]}</button>`}
+else for(const i of (S.m=='p'?OP[l]:LV.l[l]))o+=`<button data-o="${i}" ${c.done?'disabled':''}>${LBL(i)}</button>`;
+o+=`<button data-undo="1" ${c.done?'disabled':''}>⌫</button>`}
+else{const items=LV[S.m][l];items.forEach(x=>{const lab=S.m=='c'?(c.ph=='cmp'?(x?'2つ目':'1つ目'):CH[x].n):S.m=='q'?CH[x].n+(S.study?`<br><small>${FEEL[x]}</small>`:''):S.m=='i'?ivLab(x):S.m=='f'?labF(x,c):S.m=='g'?labG(x,c):S.m=='h'?labH(x,c):S.m=='j'?labJ(x,c):S.m=='k'?labK(x,c):S.m=='m'?labM(x,c):DEG[x],cor=S.m=='c'?c.cor:S.m=='q'?c.type:S.m=='i'||S.m=='f'||S.m=='g'||S.m=='h'||S.m=='j'||S.m=='k'||S.m=='m'?c.item:c.deg;
+let cl='';if(c.done){if(x==cor)cl='ok';else if(x==c.pick)cl='ng'}
+o+=`<button class="${cl}" data-o="${x}" ${c.done?'disabled':''}>${lab}</button>`})}
+$('#opts').innerHTML=o;
+let f='';
+if(S.m=='n')f=c.sfb||'';else if(c.done){if(S.m=='c')f=(c.ok?'正解！ ':'不正解。')+c.exp;else if(S.m=='q'){const nm=CH[c.type].n;f=c.ok?`正解！ ${NAMES[c.pc]} ${nm}`:`不正解。正解は「${nm}」。続けて、あなたの答え「${CH[c.pick].n}」を鳴らしました。`}
+else if(S.m=='m'){const nm=TNL[c.item],ex='（'+(S.lv.m<5?NAMES[c.key]+QMS[c.q]:'V7＝'+NAMES[(c.key+7)%12]+'7')+' ＋ '+nm+'）';
+f=c.ok?`正解！ ${nm} ${ex}`:`不正解。正解は「${nm}」${ex}。続けて、あなたの答え「${TNL[c.pick]}」を鳴らしました。`}
+else if(S.m=='k'){const l=S.lv.k;let nm,ex;
+if(l<=4){nm=KR[c.item];ex='（'+kName(c.key,c.q,c.bo)+'：コード '+NAMES[c.key]+XS[c.q]+'、ベース '+NAMES[c.bo]+'）'}
+else{nm=labK(c.item,c);ex='（キー '+NAMES[c.key]+'：'+c.seq.map(([o,q,b])=>kName(c.key+o,q,c.key+b)).join(' → ')+'）'}
+f=c.ok?`正解！ ${nm} ${ex}`:`不正解。正解は「${nm}」${ex}。${l<=4?'続けて、ベースだけ、そのあと全体を鳴らしました。':'続けて、あなたの答え「'+labK(c.pick,c)+'」を鳴らしました。'}`}
+else if(S.m=='j'){const nm=PJ[c.item].l,ex='（キー '+NAMES[c.key]+(c.mn?'マイナー':'')+'：'+c.seq.map(([o,q])=>NAMES[(c.key+o)%12]+XS[q]).join(' → ')+'）';f=c.ok?`正解！ ${nm} ${ex}`:`不正解。正解は「${nm}」${ex}。続けて、あなたの答え「${PJ[c.pick].l}」を鳴らしました。`}
+else if(S.m=='h'){const l=S.lv.h,nm=labH(c.item,c);let ex='';
+if(l>=2&&l<=3){const iv=HQ[c.item];ex='（'+NAMES[c.key]+QS[c.item]+'：3rd '+NAMES[(c.key+iv[1])%12]+'・7th '+NAMES[(c.key+iv[3])%12]+'）'}
+else if(l>=4)ex='（'+c.seq.map(([o,q])=>{const iv=HQ[q];return NAMES[(c.key+o)%12]+QS[q]+' 3rd '+NAMES[(c.key+o+iv[1])%12]+'・7th '+NAMES[(c.key+o+iv[3])%12]}).join(' → ')+'）';
+else ex='（ルート '+NAMES[c.key]+'）';
+f=c.ok?`正解！ ${nm} ${ex}`:`不正解。正解は「${nm}」${ex}。${l>=4?'続けて、実際のコード→ガイドトーン→あなたの答えのガイドトーンを鳴らしました。':l>=2?'続けて、実際のコード→ガイドトーンを鳴らしました。':''}`}
+else if(S.m=='g'){const nm=labG(c.item,c),ex='（キー '+NAMES[c.key]+'：'+c.seq.map(d=>cdName(c.key,d)).join(' → ')+'）';f=c.ok?`正解！ ${nm} ${ex}`:`不正解。正解は「${nm}」${ex}。続けて、あなたの答え「${labG(c.pick,c)}」を鳴らしました。`}
+else if(S.m=='f'){const l=S.lv.f,nm=labF(c.item,c),ex=l<=4?'（'+cdName(c.key,c.seq[0])+'、キー '+NAMES[c.key]+'）':l==5?'（'+DT[c.seq[0]][2]+' = '+cdName(c.key,c.seq[0])+'、キー '+NAMES[c.key]+'）':'（キー '+NAMES[c.key]+'：'+c.seq.map(d=>cdName(c.key,d)).join(' → ')+'）';f=c.ok?`正解！ ${nm} ${ex}`:`不正解。正解は「${nm}」${ex}。${l<=4?'続けて、あなたの答えを鳴らしました。':''}`}
+else if(S.m=='i'){const nm=ivName(c);f=c.ok?`正解！ ${nm}`:`不正解。正解は「${nm}」。続けて、あなたの答え「${ivLab(c.pick)}」を鳴らしました。`}
+else if(S.m=='b'){const nm=NAMES[(c.key+c.deg)%12];f=c.ok?`正解！ ${DEG[c.deg]}度（${nm}）`:`不正解。正解は ${DEG[c.deg]}度（${nm}）。続けて、あなたの答え ${DEG[c.pick]} を鳴らしました。`}
+else f=c.ok?`全問正解！ 枠をタップすると、各${S.m=='l'?'音':'コード'}を単独で聴けます。`:`${c.n}/${c.seq.length} 正解。枠をタップすると、各${S.m=='l'?'音':'コード'}の正解を単独で聴けます。`}
+$('#fb').textContent=f;$('#next').hidden=!(c.done||(S.m=='n'&&c.sd));cndUI();if(S.les&&S.les.plan[S.les.bi].reflect){}else if(S.les)$('#cndp').hidden=true;tsRender(c);if(S.playing)$('#play').textContent='■ 止める';if(S.m=='n'&&c.sd&&!c.done)$('#next').textContent='次のステップへ';if(songMode()){S.sgHid=true;$('#qcard').hidden=true;$('#tbar').innerHTML='';$('#cndp').hidden=true;$('#stat').textContent='';$('#song').hidden=false;songUI()}else{$('#song').hidden=true;if(S.sgHid){S.sgHid=false;$('#qcard').hidden=false}}if($('#stats').open)stats()}
+const CDR=[['reg','音域',[['low','低'],['mid','中'],['high','高']]],['inv','転回形',[[0,'基本形'],[1,'第1'],[2,'第2'],[3,'第3']]],['vc','ボイシング',[['close','クローズ'],['open','オープン']]],['tb','音色',[[0,'A'],[1,'B']]]];
+const ICR=[['root','開始音',[['r','ランダム'],...NAMES.map((n,i)=>[i,n])]],['reg','音域',[['any','全域'],['low','低'],['mid','中'],['high','高']]]];
+function icUI(){const b=S.ic;$('#cndp').hidden=false;
+$('#cndb').innerHTML=ICR.map(([k,nm,vs])=>`<div class="lg"><span class="lgl">${nm}</span><div class="lgb">${vs.map(([v,l])=>`<button class="${b[k]==v?'on':''}" data-ic="${k}:${v}">${l}</button>`).join('')}</div></div>`).join('');
+$('#cnds').textContent=(b.root=='r'?'開始音ランダム':'開始音 '+NAMES[b.root]+'固定')+'・'+({any:'全域',low:'低音域',mid:'中音域',high:'高音域'})[b.reg];
+$('#cndn').textContent='開始音を固定すると、毎回同じ高さから2音目が鳴ります。音域は、開始音の高さの目安です。開始音を固定して音域を「全域」にすると、低・中・高のどこかの高さから出題します。'+(b.reg=='low'?'低音域はスマホのスピーカーでは聴き取りにくいため、イヤホン推奨です。':'')}
+function fnUI(){$('#cndp').hidden=false;const b=S.kc,fnr='fpghjk'.indexOf(S.m)>=0&&!(S.m=='h'&&S.lv.h<4)&&!(S.m=='k'&&S.lv.k<=4);
+const rows=[['key','キー',[['r','ランダム'],...NAMES.map((n,i)=>[i,n])]],['reg','音域',[['any','全域'],['low','低'],['mid','中'],['high','高']]]];
+$('#cndb').innerHTML=rows.map(([k,nm,vs])=>`<div class="lg"><span class="lgl">${nm}</span><div class="lgb">${vs.map(([v,l])=>`<button class="${b[k]==v?'on':''}" data-kc="${k}:${v}">${l}</button>`).join('')}</div></div>`).join('')+(fnr?`<div class="lg"><span class="lgl">表示</span><div class="lgb"><button class="${fnEff()=='roman'?'on':''}" data-fn="roman">ローマ数字</button><button class="${fnEff()=='name'?'on':''}" data-fn="name">コード名（キー内）</button></div></div>`:'');
+$('#cnds').textContent=(b.key=='r'?'キーランダム':'キー '+NAMES[b.key]+'固定')+'・'+({any:'全域',low:'低音域',mid:'中音域',high:'高音域'})[b.reg]+(fnr?'・'+(fnEff()=='name'?'コード名':'ローマ数字'):'');
+$('#cndn').textContent='キーを固定すると、カデンツも問題も毎回そのキーになります。音域は、カデンツと問題の高さをまとめて変えます（既定は「中」、全域は問題ごとに低・中・高のどれか）。'+(fnr?'「コード名」にすると、選択肢がそのキーでのコード名になり、キーの名前も表示します。':'')+'確認テストと診断は、いつもキーランダム・中音域・ローマ数字です。'+(b.reg=='low'||b.reg=='any'?' 低音域はスマホのスピーカーでは聴き取りにくいため、イヤホン推奨です。':'')}
+function cndUI(){if(S.m=='i'){icUI();return}if('bflpghjkmn'.indexOf(S.m)>=0){fnUI();return}const on=S.m=='c';$('#cndp').hidden=!on;if(!on)return;const b=S.cd,T=CL[S.lv.c],ts=T.ph=='cmp'?[...new Set(T.pr.flatMap(p=>[p[0],p[1]]))]:T.opts,amb=ts.some(t=>AMB[t]),mx=Math.max(...ts.map(t=>CH[t].iv.length-1));
+$('#cndb').innerHTML=CDR.map(([k,nm,vs])=>`<div class="lg"><span class="lgl">${nm}</span><div class="lgb">${vs.map(([v,l])=>`<button class="${b[k]==v?'on':''}" data-cd="${k}:${v}" ${k=='inv'&&v>0&&(amb||v>mx)?'disabled':''}>${l}</button>`).join('')}</div></div>`).join('');
+$('#cnds').textContent=({low:'低音域',mid:'中音域',high:'高音域'})[b.reg]+'・'+['基本形','第1転回','第2転回','第3転回'][b.inv]+'・'+(b.vc=='open'?'オープン':'クローズ')+'・音色'+(b.tb?'B':'A');
+$('#cndn').textContent=(amb?'このレベルはaug・dim7を含むため、転回形は使いません（ルートが決まらなくなるため）。':b.inv?'転回形の問題では、問題文にルートの音名を表示します。コードの種類によっては、選んだ転回形より低いものになります。':'')+(b.reg=='low'?' 低音域はスマホのスピーカーでは聴き取りにくいため、イヤホン推奨です。':'')}
+const ELN={e3:'3rd（長3度⇄短3度）',e7n:'7thの有無',e7k:'7th（長7度⇄短7度）',ecx:'複合（3rd＋7th）',e5a:'5th（完全⇄増5度）',e5d:'5th（完全⇄減5度）',e7d:'7th（短7度⇄減7度）',emx:'総合判別'},CDN={reg:'音域',root:'ルート',vc:'ボイシング',bass:'転回形',tb:'音色'},CDV={reg:{low:'低',mid:'中',high:'高'},root:{fixed:'C固定',rand:'ランダム'},vc:{close:'クローズ',open:'オープン'},bass:{0:'基本形',1:'第1転回',2:'第2転回',3:'第3転回'},tb:{0:'音色A',1:'音色B'}};
+const STGN=['基本形・C固定','ルート変更','音域変更','転回形','オープンボイシング','混合・音色'],SHN={'3rd.cmp':'3rd 比較','3rd.solo':'3rd 単独','7n.cmp':'7th有無 比較','7n.solo':'7th有無 単独','7k.a':'maj7/7 比較','7k.b':'7/m7 比較','7k.c':'maj7/m7 比較','7k.solo':'7th系 単独','5a.cmp':'aug 比較','5d3.cmp':'dim 比較','5d4.cmp':'m7♭5 比較','5d7.cmp':'dim7 比較','5.solo3':'5th系 単独(三和音)','5.solo7':'5th系 単独(7th)',mix3:'総合3種',mix5:'総合5種',mix7:'総合7種',mix9:'総合9種'};
+function stg(e){if(Number.isInteger(e.dp)&&e.dp>=0&&e.dp<=5)return e.dp;const c=e.cond||{},ol=!e.cdv,r=!ol&&c.reg&&c.reg!='mid'?1:0,iv=!ol&&c.bass>0?1:0,op=!ol&&c.vc=='open'?1:0,tb=!ol&&c.tb?1:0,n=r+iv+op+tb;if(!n)return c.root=='fixed'?0:1;if(n>=2)return 5;return r?2:iv?3:op?4:5}
+const DPB={reg:'mid',inv:0,vc:'close',tb:0},DPT=['基本形・C固定','ルートランダム','音域ランダム','転回形ランダム','オープンボイシング','総合（すべてランダム）'],DPK=['キーC固定・中音域','キーランダム・中音域','キーランダム・音域ランダム'],DPM='cbflpghjkmn';
+const dpLbl=(m,i)=>m=='c'?DPT[i]:DPK[i],dpKey=m=>m=='c'?CL[S.lv.c].id:lvKey(m,S.lv[m]);
+function dpCond(m,i){if(m!='c')return{kc:{key:i==0?0:'r',reg:i==2?'any':'mid'},cd:Object.assign({},DPB),ic:{root:'r',reg:'any'},rootFix:true};
+const cd=Object.assign({},DPB);if(i==2)cd.reg='rand';if(i==3)cd.inv='rand';if(i==4)cd.vc='open';if(i==5){cd.reg='rand';cd.inv='rand';cd.vc='rand';cd.tb='rand'}
+return{kc:{key:'r',reg:'mid'},cd:cd,ic:{root:'r',reg:'any'},rootFix:i==0}}
+const dpOn=m=>DPM.indexOf(m)>=0&&!(m=='n'&&S.lv.n>=8)&&!!D.cdep&&Number.isInteger(D.cdep[dpKey(m)]);
+function sg2(e){if(Number.isInteger(e.dp)&&e.dp>=0&&e.dp<=2)return e.dp;if(e.kk)return e.kk[1]!=0?2:e.kk[0]==0?0:1;const q=(e.id||'').split('|'),k=+(e.m=='p'?q[2]:q[1]);return q.length>1&&Number.isInteger(k)&&k==0?0:1}
+function dpInfo(m){const R=[[],[],[],[],[],[]];let amb=false,nx=null,st;
+if(m=='c'){const T=CL[S.lv.c];D.log.forEach(e=>{if(e.m=='c'&&e.lid==T.id)R[stg(e)].push(e.ok)});const ts=T.ph=='cmp'?[...new Set(T.pr.flatMap(p=>[p[0],p[1]]))]:T.opts;amb=ts.some(t=>AMB[t])}
+else{const l=S.lv[m];D.log.forEach(e=>{if(e.m==m&&e.lv==l)R[sg2(e)].push(e.ok)})}
+st=R.map((a,i)=>{const l=a.slice(-20),n=l.length,p=n?l.reduce((x,y)=>x+y,0)/n:0;return i==3&&amb&&m=='c'?-1:!n?0:(n>=8&&p>=.85?2:1)});
+const top=m=='c'?5:2;for(let i=1;i<=top;i++){if(st[i]==-1)continue;const pv=m=='c'&&i==4&&st[3]==-1?2:i-1;if(st[i]<2&&st[pv]==2){nx=i;break}}return{st,nx,amb}}
+function dpName(m){return m=='c'?(SHN[CL[S.lv.c].id]||CL[S.lv.c].id):MNM[m]+' Lv'+(S.lv[m]+1)}
+function dpHTML(){const modes=DPM.split('').filter(m=>!(m=='n'&&S.lv.n>=8)),st=[],sg=[];
+modes.forEach(m=>{const k=dpKey(m),cur=D.cdep[k],has=Number.isInteger(cur);if(has)st.push([m,k,cur]);
+const inf=dpInfo(m);if(inf.nx!=null&&!(has&&cur>=inf.nx)&&!(S.dpk&&S.dpk[k])){const pv=m=='c'?(inf.nx==4&&inf.st[3]==-1?2:inf.nx-1):inf.nx-1;sg.push([m,k,inf.nx,pv])}});
+let h=st.map(([m,k,cur])=>`<p class="small" style="margin:10px 0 0">${esc(dpName(m))}のレッスン条件：<b>${dpLbl(m,cur)}</b> <button data-dp="off" data-dk="${esc(k)}" style="min-height:30px;font-size:12px;padding:2px 8px">練習設定に戻す</button></p>`).join('');
+h+=sg.slice(0,2).map(([m,k,nx,pv])=>`<div style="margin-top:10px;padding:8px 10px;border:1px solid var(--bd);border-radius:10px"><p class="small" style="margin:0 0 6px"><b>次の段階の提案</b>：「${esc(dpName(m))}」の${dpLbl(m,pv)}は安定しています。レッスンで<b>${dpLbl(m,nx)}</b>を試しますか？</p><div class="row"><button data-dp="${nx}" data-dk="${esc(k)}" class="on" style="min-height:36px;font-size:13px">試す</button><button data-dp="keep" data-dk="${esc(k)}" style="min-height:36px;font-size:13px">今のまま</button></div></div>`).join('');
+return h}
+function mtx(){const R={};D.log.forEach(e=>{if(e.m!='c'||!e.lid)return;(R[e.lid]=R[e.lid]||[[],[],[],[],[],[]])[stg(e)].push(e.ok)});
+let rows='';const sug=[];
+CL.forEach(T=>{const ts=T.ph=='cmp'?[...new Set(T.pr.flatMap(p=>[p[0],p[1]]))]:T.opts,amb=ts.some(t=>AMB[t]),A=R[T.id]||[[],[],[],[],[],[]],st=[],pp=[];
+A.forEach((a,i)=>{const l=a.slice(-20),n=l.length,p=n?l.reduce((x,y)=>x+y,0)/n:0;pp.push([n,p]);st.push(i==3&&amb?-1:!n?0:(n>=8&&p>=.85?2:1))});
+let done=false;for(let i=1;i<6&&!done;i++){if(st[i]==-1)continue;const pv=i==4&&st[3]==-1?2:i-1;if(st[i]<2&&st[pv]==2){sug.push(SHN[T.id]+'：'+STGN[i]+(st[i]?'（練習中）':'（未着手）'));done=true}}
+rows+=`<tr><td>${SHN[T.id]}</td>`+st.map((v,i)=>{if(v==-1)return'<td class="muted">—</td>';const [n,p]=pp[i];return v==0?'<td class="muted">・</td>':v==2?`<td class="mo">✓${Math.round(p*100)}</td>`:`<td${n>=5&&p<.7?' class="wk"':''}>▲${Math.round(p*100)}</td>`}).join('')+'</tr>'});
+return`<div class="h3">習得状況（テーマ × 条件）</div><div style="overflow-x:auto"><table class="st mx"><tr><th>テーマ</th>${STGN.map(x=>'<th>'+x+'</th>').join('')}</tr>${rows}</table></div><p class="muted" style="margin:6px 0 0">✓習得（直近20問のうち8問以上で85%以上）、▲練習中（数字は正答率%、赤は5問以上で70%未満）、・未着手、—対象外（aug・dim7を含むため転回形なし）。条件は自由練習の「出題条件」で変えられます。以前の記録は「基本形・C固定」と「ルート変更」に入ります。</p>`+(sug.length?`<p style="margin:8px 0 0"><b>次に試す条件の候補</b><br>${sug.slice(0,6).join('<br>')}</p>`:'')}
+function nbStat(){const f=(b)=>{const l=D.log.filter(e=>e.m=='n'&&!!e.bl==b).slice(-30),n=l.length;return n?l.reduce((a,e)=>a+(e.ok?1:0),0)+'/'+n+'（'+Math.round(l.reduce((a,e)=>a+(e.ok?1:0),0)/n*100)+'%）':'記録なし'};return`<p class="small" style="margin:4px 0">実曲採譜（直近30問）　学習：${f(false)}　実力確認：${f(true)}</p>`}
+function modeTbl(){const g=dueByMode(),cnt={};D.log.forEach(e=>cnt[e.m]=(cnt[e.m]||0)+1);
+const rows=LM.map(m=>{const N=m=='c'?CL.length:m=='n'?8:M[m].d.length;let p=0,a=0;for(let l=0;l<N;l++){const k=lvKey(m,l);if(D.pass[k]&&!D.pass[k].lapsed)p++;if(D.pass2[k])a++}
+const acc=lsAcc(m),n=cnt[m]||0;return`<tr><td>${MNM[m]}</td><td>${n?'Lv'+(S.lv[m]+1):'-'}</td><td${acc!=null&&acc<.7?' class="wk"':''}>${acc!=null?Math.round(acc*100)+'%':'-'}</td><td>${p}/${N}</td><td>${a}</td><td>${g[m]||0}</td></tr>`}).join('');
+return`<div class="h3">モード別の習熟度</div><table class="st"><tr><th>モード</th><th style="white-space:nowrap">Lv</th><th style="white-space:nowrap">直近</th><th style="white-space:nowrap">基礎</th><th style="white-space:nowrap">応用</th><th style="white-space:nowrap">復習</th></tr>${rows}</table><p class="muted small" style="margin:4px 0">Lv＝選択中のレベル／直近＝そのレベルの直近の正答率（赤は70%未満）／基礎（✓）・応用（★）＝合格したレベル数／復習＝期限が来た項目数</p>`+nbStat()}
+function stats(){const pc=(n,o)=>n?Math.round(o/n*100)+'%':'-',cell=x=>x&&x.n?`${x.ok}/${x.n}（${pc(x.n,x.ok)}）`:'-',wk=x=>x&&x.n>=5&&x.ok/x.n<.7?' class="wk"':'';
+let h='';const L=D.log,nl=L.length;
+if(!nl){$('#sbody').innerHTML='<p class="muted">まだ記録がありません。</p>';return}
+const nv=L.filter(e=>e.nv),rv=L.filter(e=>!e.nv),ac=a=>a.length?Math.round(a.reduce((x,e)=>x+e.ok,0)/a.length*100)+'%（'+a.length+'問）':'-',pl=L.filter(e=>e.pl>0),d7=L.filter(e=>e.t>Date.now()-6048e5);
+h+=`<div class="h3">全体</div><table class="st"><tr><th>回答数</th><td>${nl}件（直近7日 ${d7.length}件）</td></tr><tr><th>初見問題</th><td>${ac(nv)}</td></tr><tr><th>同じ問題の再出題</th><td>${ac(rv)}</td></tr><tr><th>平均再生回数</th><td>${pl.length?(pl.reduce((x,e)=>x+e.pl,0)/pl.length).toFixed(1)+'回':'-'}</td></tr></table>`;
+h+=modeTbl();
+const ab=D.abil,q1=ab.quality_cmp,q2=ab.quality_solo;
+h+=`<div class="h3">比較聴取と単独判別（別の能力として記録）</div><table class="st"><tr><th>比較聴取</th><td${wk(q1)}>${cell(q1)}</td></tr><tr><th>単独判別</th><td${wk(q2)}>${cell(q2)}</td></tr></table>`;
+let r='';Object.keys(ELN).forEach(k=>{const a=D.el[k+'.cmp'],b=D.el[k+'.solo'];if(!a&&!b)return;const nn=(a?a.nn:0)+(b?b.nn:0),no=(a?a.nok:0)+(b?b.nok:0);r+=`<tr><td>${ELN[k]}</td><td${wk(a)}>${cell(a)}</td><td${wk(b)}>${cell(b)}</td><td>${nn?pc(nn,no)+'（'+nn+'）':'-'}</td></tr>`});
+h+=`<div class="h3">構成音別</div>`+(r?`<table class="st"><tr><th>構成音</th><th>比較</th><th>単独</th><th>初見</th></tr>${r}</table>`:'<p class="muted">和音の構成音の記録がまだありません。</p>');
+h+=tsHist();h+=lsHist();h+=srsUI();h+=mtx();
+let c2='';Object.keys(CDN).forEach(k=>Object.keys(D.cnd).filter(x=>x.indexOf(k+':')==0).sort().forEach(x=>{const v=x.slice(k.length+1),o=D.cnd[x];c2+=`<tr><td>${CDN[k]}</td><td>${(CDV[k]||{})[v]||v}</td><td${wk(o)}>${cell(o)}</td><td>${o.nn?pc(o.nn,o.nok)+'（'+o.nn+'）':'-'}</td></tr>`}));
+h+=`<div class="h3">条件別</div>`+(c2?`<table class="st"><tr><th>条件</th><th>内容</th><th>正答</th><th>初見</th></tr>${c2}</table>`:'<p class="muted">条件別の記録がまだありません。</p>');
+const cf=Object.keys(D.conf).map(k=>{const [a,b]=k.split('>'),i=a.indexOf(':'),pre=a.slice(0,i),v=a.slice(i+1);if(pre=='cmp')return null;const nm=x=>pre=='b'?(DEG[x]||x):pre=='i'?ivLab(/^\d+$/.test(x)?+x:x):pre=='n'?(NT[x]?NT[x].l:x):pre=='m'?(TNL[x]||x):pre=='k'?(KR[x]||PKL[x]||x):pre=='j'?(PJ[x]?PJ[x].l:x):pre=='h'?(/^\d+$/.test(x)?IVN[+x]:QS[x]||PLH[x]||x):pre=='f'||pre=='g'?(/^\d$/.test(x)?DT[+x][2]:FNL[x]||String(x).replace(/-/g,'–')):(CH[x]?CH[x].n:x);return{t:({b:'ベース度数',c:'Lv2 単独',i:'音程',f:'コード機能',g:'進行パターン',h:'ガイドトーン',j:'発展進行',k:'分数コード',m:'テンション',n:'実曲採譜'})[pre]||'和音の質',s:nm(v)+' → '+nm(b),n:D.conf[k]}}).filter(Boolean).sort((x,y)=>y.n-x.n).slice(0,10);
+h+=`<div class="h3">取り違え（正解 → あなたの回答、多い順）</div>`+(cf.length?`<table class="st"><tr><th>種別</th><th>正解 → 回答</th><th>回数</th></tr>${cf.map(x=>`<tr><td>${x.t}</td><td>${x.s}</td><td>${x.n}</td></tr>`).join('')}</table>`:'<p class="muted">取り違えの記録はまだありません。</p>');
+h+='<p class="muted" style="margin-top:10px">赤字は、5問以上で正答率が70%未満の項目です。比較聴取の取り違えは、位置（1つ目か2つ目か）のため、一覧には出しません。</p>';
+$('#sbody').innerHTML=h}
+
+/* ===== 確認テスト・定着チェック ===== */
+const TN=10,TPASS=9,TPL=2,RD=864e5;
+const lvKey=(m,l)=>m=='c'?'c.'+CL[l].id:m+l;
+function keyParse(k){if(k.startsWith('c.')){const id=k.slice(2);return{m:'c',l:Math.max(0,CL.findIndex(x=>x.id==id))}}return{m:k[0],l:+k.slice(1)}}
+function keyName(k){const o=keyParse(k);return o.m=='c'?'和音の構成音 Lv'+(o.l+1)+' '+CL[o.l].n.replace(/（.*$/,''):M[o.m].n+' Lv'+(o.l+1)}
+function retDue(){const now=Date.now();return Object.keys(D.pass).filter(k=>D.pass[k].due<=now)}
+function tsLbl(c){try{if(S.m=='n')return NT[c.item].l;if(S.m=='m')return labM(c.item,c);if(S.m=='k')return labK(c.item,c);if(S.m=='j')return labJ(c.item,c);if(S.m=='h')return labH(c.item,c);if(S.m=='g')return labG(c.item,c);if(S.m=='f')return labF(c.item,c);if(S.m=='i')return ivLab(c.item);if(S.m=='l')return c.seq.map(d=>DEG[d]).join('-');if(S.m=='b')return DEG[c.deg]+'度';if(S.m=='p')return c.seq.map(d=>tab()[d][2]).join('-');if(S.m=='c')return c.ph=='cmp'?CH[c.A].n+'/'+CH[c.B].n:CH[c.type].n;return CH[c.type].n}catch(e){return'?'}}
+function tsRender(c){const T=S.test,bar=$('#tbar');
+if(T){['#ref','#diff','#pa','#pb','#study','#slow','#loop','#rfix'].forEach(x=>$(x).hidden=true);$('#cndp').hidden=true;if(!c.done)$('#play').textContent='▶ 聴く（あと'+Math.max(0,TPL-(c.pl||0))+'回）';$('#next').textContent=c.done&&T.qs.length>=(T.n||TN)?(T.kind=='d'?'採点して次へ':'結果を見る'):'次の問題';bar.innerHTML='';return}
+$('#next').textContent='次の問題';
+if(S.les||S.m=='q'||!$('#tsc').hidden){bar.innerHTML='';return}
+const l=S.lv[S.m],pp=D.pass[lvKey(S.m,l)];
+bar.innerHTML=(S.m=='n'&&l<8?`<button data-nb="1" class="${S.nb?'on':''}" style="min-height:36px;font-size:13px;padding:4px 10px">${S.nb?'実力確認モード：ON':'実力確認モード：OFF（学習）'}</button> `:'')+(S.nolog?'<span class="muted small">記録OFFのため確認テストは受けられません</span>':`<button data-ts="t" style="min-height:36px;font-size:13px;padding:4px 10px">基礎テスト（${TN}問・ヒントなし）</button> ${pp&&!pp.lapsed?`<button data-ts="a" style="min-height:36px;font-size:13px;padding:4px 10px">応用テスト（条件ランダム）</button> `:''}<span class="small muted">${D.pass2[lvKey(S.m,l)]?'応用合格★　':''}${pp?(pp.lapsed?'要復習（定着チェック不合格）':'合格済み '+new Date(pp.t).toLocaleDateString()+'／次回チェック '+new Date(pp.due).toLocaleDateString()):''}</span>`)}
+function tsUI(){const T=S.test,box=$('#tsc');if(T){$('#lsn').hidden=true;$('#mlv').hidden=true;$('#qcard').hidden=false;box.hidden=false;box.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div><b>${T.kind=='d'?'初期診断':T.kind=='r'?'定着チェック':T.kind=='a'?'応用テスト':'基礎テスト'}</b> ${Math.min(T.qs.length+1,T.n||TN)}/${T.n||TN}<br><span class="small">${T.kind=='d'?'ステップ '+(T.dg.i+1)+'：'+lvName(T.m,T.l):keyName(T.key)}／ヒントなし・再生${TPL}回まで<br>条件：${condTxt(T.m,T.cond||CC())}（表示はローマ数字）</span></div><button data-ts="stop" style="min-height:32px;font-size:12px;padding:2px 8px">中断</button></div>`}}
+function tsStart(kind,m,l){if(S.les||S.test||S.nolog)return;S.test={kind,m,l,key:lvKey(m,l),qs:[],sv:{[m]:S.lv[m]},cond:kind=='a'?{app:1,kc:{key:'r',reg:'any'},cd:{reg:'rand',inv:'rand',vc:'rand',tb:'rand'},ic:{root:'r',reg:'any'},rootFix:false}:JSON.parse(JSON.stringify(getSet()))};S.m=m;S.lv[m]=l;S.rev=false;S.study=false;S.loop=false;clearTimeout(loopT);newQ();tsUI()}
+function tsRestore(){const T=S.test;if(T){S.lv[T.m]=T.sv[T.m];D.lv=S.lv;S.test=null}}
+function tsNext(){const T=S.test;if(T.qs.length>=(T.n||TN)){if(T.kind=='d')dgStep();else tsFinish()}else{newQ();tsUI();play()}}
+function tsFinish(){const T=S.test,n=T.qs.length,ok=T.qs.reduce((a,x)=>a+x.ok,0),pass=ok>=TPASS,wr={};T.qs.filter(x=>!x.ok).forEach(x=>wr[x.lbl]=(wr[x.lbl]||0)+1);const now=Date.now();let note='';
+const pp=D.pass[T.key];
+if(T.kind=='t'){if(pass){D.pass[T.key]={t:now,acc:ok/n,ret:[],due:now+7*RD,lapsed:false};note='合格です。7日後に「定着チェック」の期限が来ます。'}else note='あと'+(TPASS-ok)+'問で合格でした。間違えた項目を復習してから再挑戦しましょう。'}
+else if(T.kind=='a'){if(pass){const q=D.pass2[T.key];D.pass2[T.key]={t:now,acc:ok/n,n:(q?q.n:0)+1};note='応用テスト合格です。条件を変えても、聴き取れています。'}else note='基礎では合格していても、条件を変えると不安定です。音域・転回形・ルートを変えた練習で、再挑戦してみましょう。'}
+else if(pp){pp.ret=pp.ret||[];pp.ret.push({t:now,pass});if(pass){pp.lapsed=false;pp.due=now+(pp.ret.filter(x=>x.pass).length==1?30:90)*RD;note='定着していました。次回のチェックは'+new Date(pp.due).toLocaleDateString()+'です。'}else{pp.lapsed=true;pp.due=now+3*RD;note='定着が不十分でした。このレベルを復習し、3日後に再チェックします。'}}
+D.tests.push({t:now,k:T.kind,key:T.key,n,ok,pass,w:wr});if(D.tests.length>200)D.tests.shift();
+const m=T.m,l=T.l;tsRestore();S.tres={m,l,pass,kind:T.kind};save();stopAll();
+const up=pass&&T.kind=='t'&&l<M[m].d.length-1;
+$('#qcard').hidden=true;$('#lsn').hidden=true;$('#mlv').hidden=true;$('#tbar').innerHTML='';const box=$('#tsc');box.hidden=false;
+box.innerHTML=`<div style="font-weight:600">${T.kind=='r'?'定着チェック':T.kind=='a'?'応用テスト':'基礎テスト'}の結果：${pass?'合格':'不合格'}</div><p style="margin:6px 0">${keyName(T.key)}　${n}問中 ${ok}問正解（合格は${TPASS}問以上）</p>${Object.keys(wr).length?'<p class="small" style="margin:4px 0">間違えた項目：'+Object.keys(wr).map(x=>x+' ×'+wr[x]).join('、')+'</p>':''}<p class="small" style="margin:4px 0">${note}</p><div class="row" style="margin-top:8px">${up?'<button data-ts="up" class="on">次のレベルへ進む</button>':''}<button data-ts="close">${up?'このまま続ける':'閉じる'}</button></div>`}
+function tsClose(){S.tres=null;$('#tsc').hidden=true;$('#qcard').hidden=false;$('#mlv').hidden=false;lsUI();newQ()}
+function tsAct(a){if(a=='t')tsStart('t',S.m,S.lv[S.m]);else if(a=='a'){if(D.pass[lvKey(S.m,S.lv[S.m])])tsStart('a',S.m,S.lv[S.m])}else if(a.startsWith('r:')){const o=keyParse(a.slice(2));tsStart('r',o.m,o.l)}
+else if(a.startsWith('dg:'))dgStart(a.slice(3))
+else if(a=='dgset'){const r=S.tres;S.lv[r.m]=r.place;D.lv=S.lv;save();tsClose()}
+else if(a=='stop'){tsRestore();save();tsClose()}
+else if(a=='up'){const r=S.tres;S.lv[r.m]=r.l+1;D.lv=S.lv;save();tsClose()}
+else if(a=='close')tsClose()}
+function tsHist(){const T=D.tests.slice(-6).reverse(),P=Object.keys(D.pass);return`<div class="h3">確認テスト・定着チェック</div>`+(P.length?`<p class="small" style="margin:4px 0">合格済み：${P.map(k=>keyName(k).replace(/^縦 /,'縦')+(D.pass[k].lapsed?'△':'✓')+(D.pass2[k]?'★':'')).join('、')}</p><p class="small muted" style="margin:0 0 4px">✓＝基礎テスト合格、★＝応用テスト（条件ランダム）合格、△＝定着チェック要復習</p>`:'')+(T.length?`<table class="st"><tr><th>日時</th><th>種類</th><th>対象</th><th>結果</th></tr>${T.map(x=>{const d=new Date(x.t);return`<tr><td>${d.getMonth()+1}/${d.getDate()}</td><td>${x.k=='r'?'定着':x.k=='a'?'応用':'基礎'}</td><td>${keyName(x.key)}</td><td>${x.ok}/${x.n}${x.pass?' ✓':''}</td></tr>`}).join('')}</table>`:'<p class="muted" style="margin:4px 0">まだ確認テストの記録がありません。昇格の目安を満たしたら、レベル表示の下の「基礎テスト」を受けてみてください。</p>')}
+
+/* ===== 初期診断 ===== */
+const DGL={c:[0,2,4,8,14],b:[0,1,2,3],p:[0,1,2,3,4,5,6,7,8,9,10,11],i:[0,1,3,4,5,7,9,11,15],l:[0,1,2,3,4],f:[0,1,2,3,4,5,6,7],g:[0,1,2,3,4,5],h:[0,1,2,3,4,5,6,7],j:[0,2,4,5,6,8,9,11,12,14,15],k:[0,1,2,3,4,5,6,7,8],m:[0,1,2,3,4,5],n:[0,1,2,3,4,5,6,7]},DGN=6,DGP=5;
+function lvName(m,l){return m=='c'?'Lv'+(l+1)+' '+CL[l].n.replace(/（.*$/,''):'Lv'+(l+1)+' '+M[m].d[l]}
+function dgStart(m){if(S.les||S.test||S.nolog)return;const lad=DGL[m].filter(l=>l<(m=='c'?CL.length:M[m].d.length));S.test={kind:'d',m,l:lad[0],key:lvKey(m,lad[0]),qs:[],sv:{[m]:S.lv[m]},n:DGN,dg:{lad,i:0,steps:[]}};S.m=m;S.lv[m]=lad[0];S.rev=false;S.study=false;S.loop=false;clearTimeout(loopT);newQ();tsUI()}
+function dgStep(){const T=S.test,g=T.dg,ok=T.qs.reduce((a,x)=>a+x.ok,0),pass=ok>=DGP;g.steps.push({l:T.l,ok,n:T.qs.length,pass});
+if(pass&&g.i+1<g.lad.length){g.i++;T.l=g.lad[g.i];T.key=lvKey(T.m,T.l);S.lv[T.m]=T.l;T.qs=[];newQ();tsUI();play();return}
+dgFinish()}
+function dgFinish(){const T=S.test,g=T.dg,m=T.m,st=g.steps;let lp=-1;st.forEach((x,i)=>{if(x.pass)lp=i});
+const place=lp<0?g.lad[0]:lp+1<g.lad.length?g.lad[lp]+1:g.lad[lp];
+D.diag.push({t:Date.now(),m,place,st:st.map(x=>({l:x.l,ok:x.ok,n:x.n}))});if(D.diag.length>50)D.diag.shift();
+const cur=T.sv[m];tsRestore();S.tres={m,place,kind:'d'};save();stopAll();
+$('#qcard').hidden=true;$('#lsn').hidden=true;$('#mlv').hidden=true;$('#tbar').innerHTML='';const box=$('#tsc');box.hidden=false;
+box.innerHTML=`<div style="font-weight:600">初期診断の結果：${MNM[m].replace('（Lv2）','')}</div><table class="st"><tr><th>レベル</th><th>正解</th><th></th></tr>${st.map(x=>`<tr><td>${lvName(m,x.l)}</td><td>${x.ok}/${x.n}</td><td>${x.pass?'✓':'✗'}</td></tr>`).join('')}</table><p style="margin:8px 0 4px">練習の開始目安：<b>${lvName(m,place)}</b>${place==cur?'（いまのレベルと同じです）':'（いまは '+lvName(m,cur)+'）'}</p><p class="muted small" style="margin:0">各レベル${DGN}問、${DGP}問以上で次へ進む簡易判定です。1回の結果にはぶれがあるので、目安として使ってください。</p><div class="row" style="margin-top:8px">${place!=cur?'<button data-ts="dgset" class="on">この目安に設定</button>':''}<button data-ts="close">${place!=cur?'今のまま':'閉じる'}</button></div>`}
+
+/* ===== 今日のレッスン ===== */
+const LMODES={5:'5分',15:'15分',25:'25分'},MNM={i:'音程',b:'ベース度数',l:'ベースライン',c:'和音の構成音',f:'コード機能',g:'進行パターン',p:'進行ディクテーション',h:'ガイドトーン',k:'分数コード',j:'発展進行',m:'テンション',n:'実曲採譜'};
+function dueByMode(){const g={c:0,b:0,p:0,i:0,l:0,f:0,g:0,h:0,j:0,k:0,m:0,n:0};srsDue().forEach(k=>{if(/^(cs|cp):/.test(k))g.c++;else if(/^b:/.test(k))g.b++;else if(/^p:/.test(k))g.p++;else if(/^i:/.test(k))g.i++;else if(/^l:/.test(k))g.l++;else if(/^f:/.test(k))g.f++;else if(/^g:/.test(k))g.g++;else if(/^h:/.test(k))g.h++;else if(/^j:/.test(k))g.j++;else if(/^k:/.test(k))g.k++;else if(/^m:/.test(k))g.m++;else if(/^n:/.test(k))g.n++});return g}
+function lsAcc(m){const a=D.acc[m=='c'?'c.'+CL[S.lv.c].id:m+S.lv[m]]||[];return a.length?a.reduce((x,y)=>x+y,0)/a.length:null}
+const LM=['i','b','l','c','f','g','p','h','k','j','m','n'];
+const NBT={'7thの有無・種類':'c','3rd（長短）':'c','5thの変化':'c','ベース違い（転回形）':'k','ルート違い':'b'},NBN={c:'コードの種類の取り違え',k:'ベース・転回形の取り違え',b:'ルートの取り違え',m:'テンションの迷い',f:'キーの迷い',l:'ベースの迷い',g:'進行の流れの迷い'};
+function nbWeak(){const lim=Date.now()-30*864e5,ev={},day=t=>new Date(t).toISOString().slice(0,10);
+(D.songs||[]).forEach((g,gi)=>(g.sec||[]).forEach((c,ci)=>{const add=(m,t)=>{if(!m||!(t>=lim))return;const k=m,e=ev[k]=ev[k]||new Set();e.add(gi+'|'+ci+'|'+day(t))};
+(c.hist||[]).forEach(h=>{if(h.k=='cmp'&&h.g)Object.keys(h.g).forEach(t=>add(NBT[t],h.t))});
+(c.hard||[]).forEach(k=>add(HM[k],c.hardT&&c.hardT[k]))}));
+const o={};Object.keys(ev).forEach(m=>{if(ev[m].size>=2)o[m]=NBN[m]});return o}
+function lsState(){const nbw=nbWeak(),g=dueByMode(),st={},now=Date.now();D.log.forEach(e=>{const o=st[e.m]=st[e.m]||{n:0,last:0};o.n++;if(e.t>o.last)o.last=e.t});
+return LM.map(m=>{const o=st[m]||{n:0,last:0},acc=lsAcc(m),pk=D.pass[lvKey(m,S.lv[m])],passed=!!pk&&!pk.lapsed,lap=!!pk&&!!pk.lapsed,started=o.n>0,weak=acc!=null&&acc<.7,days=o.last?(now-o.last)/864e5:0;
+const nbk=started&&nbw[m]?nbw[m]:'';return{m,started,acc,passed,lap,nbk,due:g[m]||0,weak,learning:started&&!passed,days,rs:(g[m]||0)+(weak?3:0)+(lap?3:0)+(nbk?2:0),fs:(acc==null?.6:(1-acc)*2)+Math.min(days,7)*.1}})}
+function lsPlan0(min){const A=lsState(),by=m=>A.find(x=>x.m==m),pc=x=>Math.round(x.acc*100)+'%';
+const rv=A.filter(x=>x.rs>0).sort((a,b)=>b.rs-a.rs)[0],learn=A.filter(x=>x.learning).sort((a,b)=>b.fs-a.fs),news=A.filter(x=>!x.started),
+fc=learn.find(x=>!rv||x.m!=rv.m)||learn[0]||news[0]||A.filter(x=>x.started).sort((a,b)=>b.fs-a.fs)[0]||by('c');
+const why=x=>[x.due?'期限切れ'+x.due+'項目':'',x.weak?'直近'+pc(x):'',x.lap?'定着チェック要復習':'',x.nbk?'採譜ノート：'+x.nbk:''].filter(Boolean).join('・');
+const focusN=x=>'重点：'+MNM[x.m]+(x.passed?'（合格済み・次のレベルも試せます）':x.acc!=null?'（直近'+pc(x)+'）':'（これから）');
+let nb;const apps=A.filter(x=>x.started&&x.passed).sort((a,b)=>b.days-a.days);
+const nw=news.find(x=>x.m!=fc.m);
+if(nw&&learn.length<2)nb={n:'新規：'+MNM[nw.m]+'を始める',m:nw.m};
+else if(apps.length){const ap=apps.find(x=>x.m!=fc.m)||apps[0];nb={n:'応用：'+MNM[ap.m]+'（条件ランダム）',m:ap.m,app:1}}
+else{const o=learn.find(x=>x.m!=fc.m)||fc;nb={n:focusN(o),m:o.m}}
+const pool=[];A.filter(x=>x.started).forEach(x=>{pool.push(x.m);if(x.learning)pool.push(x.m)});if(!pool.length)pool.push('c');
+const R_=t=>rv?{n:'復習・苦手：'+MNM[rv.m]+'（'+why(rv)+'）',mins:t,m:rv.m,rev:1}:{n:'復習（期限切れ・苦手なし）→'+focusN(fc),mins:t,m:fc.m,rev:1},
+F=t=>({n:focusN(fc),mins:t,m:fc.m}),N=t=>Object.assign({mins:t},nb),MX=t=>({n:'混合問題（着手済みの内容をランダムに）',mins:t,mix:1,pool}),RF={n:'振り返り',reflect:1,mins:0};
+if(min==5)return[R_(1),F(2),N(2),RF];
+if(min==15)return[{n:'ウォームアップ（音程）',mins:2,m:'i'},R_(4),F(2.5),N(2.5),MX(3),RF];
+return[{n:'ウォームアップ（音程）',mins:2,m:'i'},R_(5),F(6),N(6),MX(5),RF]}
+function lsPlan(min){const P=lsPlan0(min),ac=DPM.split('').filter(dpOn);if(!ac.length)return P;
+P.forEach(b=>{if(b.app&&b.m&&ac.includes(b.m)){b.app=0;b.n=MNM[b.m]+'（レッスン条件：'+dpLbl(b.m,D.cdep[dpKey(b.m)])+'）'}});
+if(!P.some(b=>!b.reflect&&!b.mix&&ac.includes(b.m))){const lastT=m=>{for(let i=D.log.length-1;i>=0;i--)if(D.log[i].m==m)return D.log[i].t;return 0};const m=ac.slice().sort((a,b)=>lastT(a)-lastT(b))[0];
+const cd=P.map((b,j)=>j).filter(j=>{const b=P[j];return b.m!=null&&!b.rev&&b.m!='i'&&!b.reflect&&!b.mix});const na=cd.filter(j=>!P[j].app);const k=na.length?na[na.length-1]:cd.length?cd[cd.length-1]:-1;
+if(k>=0)P[k]={n:(m=='c'?'和音の構成音':MNM[m])+'（レッスン条件：'+dpLbl(m,D.cdep[dpKey(m)])+'）',mins:P[k].mins,m:m}}
+P.forEach(b=>{if(!b.reflect&&!b.mix&&!b.app&&b.m&&dpOn(b.m)&&b.n.indexOf('レッスン条件')<0)b.n+='［条件：'+dpLbl(b.m,D.cdep[dpKey(b.m)])+'］'});return P}
+function lsStart(min){S.les={id:Date.now().toString(36),min,plan:lsPlan(min),bi:-1,qs:[],t0:Date.now()};S.rev=false;lsBlock(0);if(!lsTimer)lsTimer=setInterval(lsTick,1000)}
+let lsTimer=null;
+function lsBlock(i){const L=S.les;L.bi=i;const b=L.plan[i];L.bt=Date.now();stopAll();if(b.reflect){S.rev=false;lsFinish();return}
+if(b.m=='n'&&S.lv.n>=8)S.lv.n=7;S.rev=!!b.rev;S.appc=!!b.app;S.study=false;S.m=b.mix?b.pool[R(b.pool.length)]:b.m;newQ();lsUI();$('#play').click&&0}
+function lsNext(){const L=S.les,b=L.plan[L.bi];if(Date.now()-L.bt>=b.mins*60000){lsBlock(L.bi+1);if(S.les&&!L.plan[L.bi].reflect)play();return}
+if(b.mix)S.m=b.pool[R(b.pool.length)];newQ();play()}
+function lsTick(){if(!S.les||!$('#lt'))return;const L=S.les,b=L.plan[L.bi];if(!b||b.reflect)return;const r=Math.max(0,Math.ceil((b.mins*60000-(Date.now()-L.bt))/1000));$('#lt').textContent=Math.floor(r/60)+':'+String(r%60).padStart(2,'0')+(r==0?'（この問題で区切り）':'')}
+function lsUI(){if(S.test)return;const L=S.les,box=$('#lsn');if(!L){box.hidden=false;$('#qcard').hidden=false;$('#mlv').hidden=false;$('#cndp').hidden='cipfblghjkmn'.indexOf(S.m)<0;
+const td=new Date().toDateString(),n=D.les.filter(x=>new Date(x.t).toDateString()==td).length,last=D.les[D.les.length-1];
+box.innerHTML=`<div style="font-weight:600">今日のレッスン</div><p class="muted small" style="margin:4px 0 8px">復習・苦手、重点課題、新規・応用を、学習記録から自動で選んで進めます。今日 ${n}回完了${last?'／前回 '+LMODES[last.min]+' '+last.n+'問・'+Math.round(last.ok/Math.max(1,last.n)*100)+'%':''}／復習期限 ${srsDue().length}項目</p><div class="row"><button data-ls="5">5分</button><button data-ls="15" class="on">15分</button><button data-ls="25">25分</button></div>${dpHTML()}<p class="small" style="margin:10px 0 4px">初期診断（各レベル6問・ヒントなし）で、いまの実力に合う開始レベルの目安が分かります。</p><div class="row" style="display:grid;grid-template-columns:repeat(2,1fr)"><button data-ts="dg:i" style="white-space:nowrap;font-size:14px;padding-left:4px;padding-right:4px">音程</button><button data-ts="dg:b" style="white-space:nowrap;font-size:14px;padding-left:4px;padding-right:4px">ベース度数</button><button data-ts="dg:l" style="white-space:nowrap;font-size:14px;padding-left:4px;padding-right:4px">ベースライン</button><button data-ts="dg:c" style="white-space:nowrap;font-size:14px;padding-left:4px;padding-right:4px">和音の構成音</button><button data-ts="dg:f" style="white-space:nowrap;font-size:14px;padding-left:4px;padding-right:4px">コード機能</button><button data-ts="dg:g" style="white-space:nowrap;font-size:14px;padding-left:4px;padding-right:4px">進行パターン</button><button data-ts="dg:p" style="white-space:nowrap;font-size:14px;padding-left:4px;padding-right:4px">進行ディクテーション</button><button data-ts="dg:h" style="white-space:nowrap;font-size:14px;padding-left:4px;padding-right:4px">ガイドトーン</button><button data-ts="dg:k" style="white-space:nowrap;font-size:14px;padding-left:4px;padding-right:4px">分数コード</button><button data-ts="dg:j" style="white-space:nowrap;font-size:14px;padding-left:4px;padding-right:4px">発展進行</button><button data-ts="dg:m" style="white-space:nowrap;font-size:14px;padding-left:4px;padding-right:4px">テンション</button><button data-ts="dg:n" style="white-space:nowrap;font-size:14px;padding-left:4px;padding-right:4px">実曲採譜</button></div>${retDue().length?'<p class="small" style="margin:10px 0 4px"><b>定着チェックの期限が来ています</b>（合格した内容を、時間を空けて確認します）</p><div class="row">'+retDue().slice(0,3).map(k=>`<button data-ts="r:${k}">${keyName(k)}</button>`).join('')+'</div>':''}`;return}
+$('#mlv').hidden=true;$('#cndp').hidden=true;const b=L.plan[L.bi];
+if(b.reflect){box.hidden=false;$('#qcard').hidden=true;return}
+box.hidden=false;$('#qcard').hidden=false;
+box.innerHTML=`<div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div><b>${LMODES[L.min]}レッスン</b> ${L.bi+1}/${L.plan.length}<br><span>${b.n}</span></div><div style="text-align:right"><div id="lt" style="font-size:20px;font-weight:700"></div><button data-ls="stop" style="min-height:32px;font-size:12px;padding:2px 8px">中断</button></div></div>`;lsTick()}
+function lsFinish(){const L=S.les,tot=L.qs.length,ok=L.qs.reduce((a,x)=>a+x.ok,0),bl=L.plan.map((b,i)=>({n:b.n,q:L.qs.filter(x=>x.b==i)})).filter(x=>x.q.length);
+if(tot&&!L.qs.every(x=>x.nolog)){D.les.push({t:Date.now(),min:L.min,n:tot,ok,dur:Math.round((Date.now()-L.t0)/1000),b:bl.map(x=>({n:x.n,n_:x.q.length,ok:x.q.reduce((a,y)=>a+y.ok,0)}))});if(D.les.length>200)D.les.shift();save()}
+const g=dueByMode(),due=g.c+g.b+g.p+g.i+g.l+g.f+g.g+g.h+g.j+g.k+g.m+g.n,sg=[];['c','b','p','i','l','f','g','h','j','k','m','n'].forEach(m=>{const a=lsAcc(m);if(a!=null&&a<.7)sg.push(MNM[m]+'（直近'+Math.round(a*100)+'%）')});
+$('#lsn').innerHTML=`<div style="font-weight:600">レッスン終了：${LMODES[L.min]}</div><p style="margin:6px 0">${tot}問中 ${ok}問正解（${tot?Math.round(ok/tot*100):0}%）／所要 ${Math.max(1,Math.round((Date.now()-L.t0)/60000))}分</p><table class="st"><tr><th>ブロック</th><th>問数</th><th>正答率</th></tr>${bl.map(x=>{const o=x.q.reduce((a,y)=>a+y.ok,0);return`<tr><td>${x.n}</td><td>${x.q.length}</td><td>${Math.round(o/x.q.length*100)}%</td></tr>`}).join('')}</table><p class="small" style="margin:8px 0 0">${sg.length?'苦手の目安：'+sg.join('、')+'<br>':''}復習の期限が来ている項目：${due}件（次回のレッスンの復習ブロックで出題します）</p><div class="row" style="margin-top:8px"><button data-ls="done" class="on">閉じる</button></div>`;stopAll();if(S.nolog&&0){}}
+function lsEnd(){S.les=null;S.rev=false;S.appc=false;if(lsTimer){clearInterval(lsTimer);lsTimer=null}lsUI();newQ()}
+
+document.addEventListener('click',e=>{const dp=e.target.closest('[data-dp]');if(dp&&!S.les&&!S.test){const v=dp.dataset.dp,id=dp.dataset.dk;if(v=='off')delete D.cdep[id];else if(v!='keep')D.cdep[id]=+v;if(v=='keep'){S.dpk=S.dpk||{};S.dpk[id]=1}save();lsUI();return}
+const nb=e.target.closest('[data-nb]');if(nb&&!S.test&&!S.les){S.nb=!S.nb;save();stopAll();newQ();render();return}
+const t=e.target.closest('[data-kc],[data-fn],[data-ic],[data-ts],[data-ls],[data-m],[data-l],[data-o],[data-s],[data-undo],[data-cd]');if(!t)return;const d=t.dataset;
+if(d.ts){tsAct(d.ts)}
+else if(d.ls){if(d.ls=='stop'){if(confirm&&0){}lsEnd()}else if(d.ls=='done')lsEnd();else lsStart(+d.ls)}
+else if(d.m){S.m=d.m;newQ()}
+else if(d.l){S.lv[S.m]=+d.l;D.lv=S.lv;save();newQ()}
+else if(d.o!=null){if(S.m=='c')answer(S.cur.ph=='cmp'?+d.o:d.o);else if(S.m=='q'){if(S.study)demo(d.o);else answer(d.o)}else if(S.m=='i'||S.m=='f'||S.m=='g'||S.m=='h'||S.m=='j'||S.m=='k'||S.m=='m')answer(/^\d+$/.test(d.o)?+d.o:d.o);else if(S.m=='b')answer(+d.o);else if(S.m=='n')tapN(d.o);else tap(+d.o)}
+else if(d.kc){const [k,v]=d.kc.split(':');S.kc[k]=(k=='key'&&v!='r')?+v:v;save();newQ()}
+else if(d.fn){S.fn=d.fn;save();render()}
+else if(d.ic){const [k,v]=d.ic.split(':');S.ic[k]=(k=='root'&&v!='r')?+v:v;save();newQ()}
+else if(d.cd){const [k,v]=d.cd.split(':');S.cd[k]=(k=='inv'||k=='tb')?+v:v;save();newQ()}
+else if(d.s!=null)playOne(+d.s)
+else if(d.undo){if(S.cur.sd)return;if(S.cur.pend!=null)S.cur.pend=null;else S.cur.ans.pop();render()}});
+$('#play').onclick=()=>{if(S.playing){stopAll();render();return}play()};
+$('#stats').addEventListener('toggle',()=>{if($('#stats').open)stats()});
+$('#next').onclick=()=>{if(S.m=='n'&&S.cur.sd&&!S.cur.done){nAdv();return}if(S.test){tsNext();return}if(S.les){lsNext();return}newQ();play()};
+function revBtn(){const n=srsDue().length,b=$('#rev');b.textContent='復習 '+(S.rev?'ON':'OFF')+'（'+n+'）';b.classList.toggle('on',!!S.rev)}
+$('#rev').onclick=()=>{S.rev=!S.rev;revBtn();newQ()};
+$('#nolog').onclick=e=>{S.nolog=!S.nolog;e.target.textContent=S.nolog?'記録: OFF':'記録: ON';e.target.classList.toggle('on',S.nolog);render()};
+$('#pa').onclick=()=>one(0);$('#pb').onclick=()=>one(1);
+$('#diff').onclick=()=>{const c=S.cur;if(!c.done)c.hint=(c.hint||0)+1;if(S.m=='n'){init();ctx.resume&&ctx.resume();stopAll();playN(c,ctx.currentTime+.08,S.slow?1.6:1,3);return}playDiff()};
+$('#rfix').onclick=e=>{S.rootFix=S.rootFix===false;e.target.textContent='ルート: '+(S.rootFix===false?'ランダム':'固定');save();newQ()};
+let pend=null;
+$('#cpy').onclick=async()=>{const b=$('#box'),m=$('#dmsg');if(!b.value){m.textContent='先に「書き出し」を押してください。';return}let ok=false;try{await navigator.clipboard.writeText(b.value);ok=true}catch(e){}if(!ok){b.focus();b.select();b.setSelectionRange(0,b.value.length);try{ok=document.execCommand('copy')}catch(e){}}m.textContent=ok?'コピーしました。メモアプリなどに貼り付けて保管してください。':'コピーできませんでした。テキスト欄を長押しして「すべてを選択」→「コピー」をお試しください。'};
+$('#pst').onclick=async()=>{const b=$('#box'),m=$('#dmsg');try{const t=await Promise.race([navigator.clipboard.readText(),new Promise((_,r)=>setTimeout(r,1500))]);if(!t)throw 0;b.value=t;m.textContent='貼り付けました。検証します。';$('#imp').click()}catch(e){b.value='';b.focus();m.textContent='このブラウザでは自動の貼り付けができません。入力欄を長押しして「ペースト」を選んでください（貼り付けると自動で検証します）。'}};
+let rstT=null;
+$('#rst').onclick=e=>{const m=$('#dmsg');if(S.les||S.test){m.textContent='レッスン・テスト中はリセットできません。先に終了してください。';return}
+if(!rstT){e.target.textContent='本当にリセット（もう一度押す）';e.target.classList.add('on');rstT=setTimeout(()=>{rstT=null;e.target.textContent='記録をリセット';e.target.classList.remove('on')},5000);m.textContent='すべての記録（正答率・ログ・復習・テスト）を消します。念のため先に「書き出し」でバックアップを取っておくと安心です。直前の状態は「直前の状態に戻す」で1回だけ復元できます。';return}
+clearTimeout(rstT);rstT=null;e.target.textContent='記録をリセット';e.target.classList.remove('on');
+try{localStorage.setItem('etv2_prev',JSON.stringify(D))}catch(x){}
+D=migrate({});S.lv=D.lv;S.retry=[];S.bag={};S.lp={};S.rev=false;S.seq=0;save();m.textContent='記録をリセットしました。';lsUI();newQ()};
+$('#rsu').onclick=()=>{const m=$('#dmsg');if(S.les||S.test){m.textContent='レッスン・テスト中は戻せません。';return}let P=null;try{P=JSON.parse(localStorage.getItem('etv2_prev'))}catch(x){}
+if(!P||typeof P!='object'){m.textContent='戻せる状態がありません。';return}
+try{localStorage.setItem('etv2_prev',JSON.stringify(D))}catch(x){}D=migrate(P);S.lv=D.lv;save();m.textContent='直前の状態に戻しました（戻す前の状態は、もう一度押すと復元できます）。';lsUI();newQ()};
+$('#box').addEventListener('paste',()=>setTimeout(()=>$('#imp').click(),80));
+$('#exp').onclick=()=>{const j=JSON.stringify({app:'ear-training',schema:SCHEMA,exported:new Date().toISOString(),data:D}),b=$('#box');b.value=j;b.focus();b.select();b.setSelectionRange(0,j.length);let ok=false;try{ok=document.execCommand('copy')}catch(e){}$('#dmsg').textContent=ok?'コピーしました。メモアプリなどに貼り付けて保管してください。':'全選択してコピーし、メモアプリなどに貼り付けて保管してください。';$('#apply').hidden=true;pend=null};
+$('#imp').onclick=()=>{const m=$('#dmsg');let o;$('#apply').hidden=true;pend=null;try{o=JSON.parse($('#box').value)}catch(e){m.textContent='読み込めません：JSONとして解釈できません';return}
+const er=validate(o);if(er){m.textContent='読み込めません：'+er;return}
+pend=migrate(JSON.parse(JSON.stringify(o.data)));m.textContent='検証OK：形式v'+o.schema+'／ログ'+pend.log.length+'件。現在のデータは'+D.log.length+'件です。上書きすると現在のデータは置き換わります（直前の状態は1回分だけ自動で退避されます）。';$('#apply').hidden=false};
+$('#apply').onclick=()=>{if(!pend)return;try{localStorage.setItem('etv2_prev',JSON.stringify(D))}catch(e){}D=pend;pend=null;S.lv=D.lv;save();$('#apply').hidden=true;$('#dmsg').textContent='読み込みました。';newQ()};
+$('#study').onclick=e=>{S.study=!S.study;e.target.textContent='お手本 '+(S.study?'ON':'OFF');e.target.classList.toggle('on',S.study);stopAll();render()};
+$('#ref').onclick=()=>{init();ctx.resume&&ctx.resume();stopAll();const c=S.cur,t=ctx.currentTime+.05;if(!c.done)c.hint=(c.hint||0)+1;if(S.m=='k'){const ch=S.lv.k<=4?[XQ[c.q].map(y=>(c.key+y)%12)]:c.seq.slice(0,1).map(([o,q])=>XQ[q].map(y=>(c.key+o+y)%12));voiceK(ch,c.sh||0)[0].forEach(n=>tone(n,t,1.8,.3,0))}else if(S.m=='b'||S.m=='l'||S.m=='n')tone(bm(c.key)+(c.sh||0),t,1.6,.45,0);else chord(c.key,CH[tab()[0][1]].iv,t,1.8,0,null,64+(c.sh||0))};
+$('#slow').onclick=e=>{S.slow=!S.slow;e.target.textContent='スロー '+(S.slow?'ON':'OFF');e.target.classList.toggle('on',S.slow)};
+$('#loop').onclick=e=>{S.loop=!S.loop;e.target.textContent='ループ '+(S.loop?'ON':'OFF');e.target.classList.toggle('on',S.loop);if(!S.loop)clearTimeout(loopT)};
+newQ();lsUI();
+</script>
+<script>
+if('serviceWorker' in navigator&&(location.protocol=='https:'||location.hostname=='localhost')){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
+</script>
+</body>
+</html>
